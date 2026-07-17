@@ -1,0 +1,12 @@
+ارفع محتويات هذا المجلد فقط إلى GitHub.
+
+في الصفحة الرئيسية للمستودع يجب أن ترى مباشرة:
+- package.json
+- src
+- public
+- supabase
+- render.yaml
+- README.md
+
+لا ترفع المجلد الأب greeting-cards-organized-package إلى المستودع.
+ولا ترفع مجلدي 02-SUPABASE-SETUP أو 03-RENDER-SETTINGS.
