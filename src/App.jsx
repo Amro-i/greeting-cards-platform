@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicCardPage from './pages/PublicCardPage';
+import ActivityPage from './pages/admin/ActivityPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import LoginPage from './pages/admin/LoginPage';
 import OccasionsPage from './pages/admin/OccasionsPage';
@@ -23,7 +24,7 @@ export default function App() {
           <Route path="templates" element={<TemplatesPage />} />
           <Route path="templates/:templateId/editor" element={<TemplateEditorPage />} />
           <Route path="fonts" element={<FontsPage />} />
-          <Route path="activity" element={<PlaceholderPage title="السجل والإحصائيات" description="متابعة الأشخاص والبطاقات التي تم إنشاؤها." />} />
+          <Route path="activity" element={<ActivityPage />} />
           <Route path="settings" element={<PlaceholderPage title="الإعدادات" description="إعدادات المنصة والرسائل العامة." />} />
         </Route>
       </Route>

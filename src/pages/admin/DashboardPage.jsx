@@ -20,15 +20,16 @@ export default function DashboardPage() {
       const now = new Date().toISOString();
       const results = await Promise.all([
         supabase.from('occasions').select('*', { count: 'exact', head: true }).eq('status', 'active').lte('starts_at', now).gte('ends_at', now),
-        supabase.from('generation_logs').select('*', { count: 'exact', head: true }),
+        supabase.from('statistics_totals').select('total_generated'),
         supabase.from('templates').select('*', { count: 'exact', head: true }),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_active', true),
       ]);
 
       if (!active) return;
+      const generatedCards = (results[1].data || []).reduce((total, item) => total + Number(item.total_generated || 0), 0);
       setStats({
         activeOccasions: results[0].count || 0,
-        generatedCards: results[1].count || 0,
+        generatedCards,
         templates: results[2].count || 0,
         adminUsers: results[3].count || 0,
       });
@@ -41,7 +42,7 @@ export default function DashboardPage() {
 
   const cards = [
     { label: 'المناسبات النشطة', value: stats.activeOccasions, icon: CalendarCheck2 },
-    { label: 'البطاقات المنشأة', value: stats.generatedCards, icon: Image },
+    { label: 'إجمالي البطاقات', value: stats.generatedCards, icon: Image },
     { label: 'القوالب', value: stats.templates, icon: LayoutTemplate },
     { label: 'مستخدمو الإدارة', value: stats.adminUsers, icon: UsersRound },
   ];
@@ -64,10 +65,10 @@ export default function DashboardPage() {
       </div>
       <div className="content-card dashboard-start-card">
         <div>
-          <h2>ابدأ بإضافة مناسبة</h2>
-          <p>حدد وقت ظهور المناسبة وارفع القالب المربع والمستطيل. الصفحة العامة ستتحدث تلقائيًا.</p>
+          <h2>متابعة النتائج</h2>
+          <p>راجع الأسماء والإحصائيات اليومية وإجمالي استخدام كل مناسبة من صفحة السجل والإحصائيات.</p>
         </div>
-        <a className="primary-button" href="/admin/occasions">إدارة المناسبات</a>
+        <a className="primary-button" href="/admin/activity">عرض السجل والإحصائيات</a>
       </div>
     </section>
   );
