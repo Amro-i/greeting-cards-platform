@@ -106,3 +106,8 @@
     height: 35px !important;
   }
 }
+
+/* Public form step numbers: sharp square corners. */
+.builder-section-heading > span {
+  border-radius: 0 !important;
+}
