@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Eye, EyeOff, ImageOff, LoaderCircle, Palette, Trash2 } from 'lucide-react';
+import { CopyPlus, Eye, EyeOff, ImageOff, LoaderCircle, Palette, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useAuth } from '../../context/AuthContext';
@@ -30,8 +30,8 @@ export default function TemplatesPage() {
       .from('templates')
       .select(`
         id, name, shape, image_path, image_width, image_height, is_active, created_at, updated_at,
-        occasion:occasions (id, title_ar, title_en, status, starts_at, ends_at),
-        template_settings (id)
+        occasion:occasions (id, title_ar, title_en, status, starts_at, ends_at, archived_at),
+        template_settings (id, arabic_settings, english_settings)
       `)
       .order('updated_at', { ascending: false });
 
@@ -76,19 +76,81 @@ export default function TemplatesPage() {
     setBusyId('');
   }
 
+  async function duplicateTemplate(template) {
+    if (!canManage || busyId) return;
+    setBusyId(template.id);
+    setError('');
+
+    let uploadedPath = '';
+    let duplicateId = '';
+    try {
+      const { data: fileBlob, error: downloadError } = await supabase.storage
+        .from(TEMPLATE_BUCKET)
+        .download(template.image_path);
+      if (downloadError) throw downloadError;
+
+      const extension = template.image_path.split('.').pop()?.toLowerCase() || 'jpg';
+      uploadedPath = `${template.occasion.id}/${template.shape}-duplicate-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${extension}`;
+      const { error: uploadError } = await supabase.storage.from(TEMPLATE_BUCKET).upload(uploadedPath, fileBlob, {
+        cacheControl: '3600',
+        contentType: fileBlob.type || undefined,
+        upsert: false,
+      });
+      if (uploadError) throw uploadError;
+
+      duplicateId = crypto.randomUUID();
+      const { error: insertError } = await supabase.from('templates').insert({
+        id: duplicateId,
+        occasion_id: template.occasion.id,
+        name: `${template.name} Copy ${Date.now().toString(36)}`,
+        shape: template.shape,
+        image_path: uploadedPath,
+        image_width: template.image_width,
+        image_height: template.image_height,
+        is_active: false,
+        created_by: profile.id,
+        updated_at: new Date().toISOString(),
+      });
+      if (insertError) throw insertError;
+
+      const currentSettings = Array.isArray(template.template_settings)
+        ? template.template_settings[0]
+        : template.template_settings;
+      if (currentSettings) {
+        const { error: settingsError } = await supabase.from('template_settings').insert({
+          template_id: duplicateId,
+          arabic_settings: currentSettings.arabic_settings || {},
+          english_settings: currentSettings.english_settings || {},
+          updated_by: profile.id,
+          updated_at: new Date().toISOString(),
+        });
+        if (settingsError) throw settingsError;
+      }
+
+      setNotice('تم نسخ القالب وإضافته كقالب غير مفعّل.');
+      await loadTemplates();
+    } catch (duplicateError) {
+      if (duplicateId) await supabase.from('templates').delete().eq('id', duplicateId);
+      if (uploadedPath) await supabase.storage.from(TEMPLATE_BUCKET).remove([uploadedPath]);
+      setError(getFriendlySupabaseError(duplicateError));
+    } finally {
+      setBusyId('');
+    }
+  }
+
   async function deleteTemplate() {
     if (!deleteTarget || !canManage || busyId) return;
     setBusyId(deleteTarget.id);
     setError('');
 
     try {
+      const { error: deleteError } = await supabase.from('templates').delete().eq('id', deleteTarget.id);
+      if (deleteError) throw deleteError;
+
       const { error: storageError } = await supabase.storage
         .from(TEMPLATE_BUCKET)
         .remove([deleteTarget.image_path]);
       if (storageError) console.warn('Template file cleanup failed:', storageError.message);
-
-      const { error: deleteError } = await supabase.from('templates').delete().eq('id', deleteTarget.id);
-      if (deleteError) throw deleteError;
 
       setDeleteTarget(null);
       setNotice('تم حذف القالب.');
@@ -162,7 +224,10 @@ export default function TemplatesPage() {
                     </Link>
                     {canManage && (
                       <>
-                        <button className="secondary-button" type="button" onClick={() => toggleTemplate(template)} disabled={busyId === template.id}>
+                        <button className="secondary-button" type="button" onClick={() => duplicateTemplate(template)} disabled={Boolean(busyId)}>
+                          {busyId === template.id ? <LoaderCircle className="spin" size={17} /> : <CopyPlus size={17} />} نسخ
+                        </button>
+                        <button className="secondary-button" type="button" onClick={() => toggleTemplate(template)} disabled={Boolean(busyId)}>
                           {template.is_active ? <><EyeOff size={17} /> إخفاء</> : <><Eye size={17} /> تفعيل</>}
                         </button>
                         <button className="icon-button danger-icon" type="button" aria-label="حذف القالب" onClick={() => setDeleteTarget(template)} disabled={Boolean(busyId)}>

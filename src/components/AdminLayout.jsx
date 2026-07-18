@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Wrench,
   CalendarDays,
   Files,
   LayoutDashboard,
@@ -19,6 +20,7 @@ const links = [
   { to: '/admin/templates', label: 'القوالب', icon: Files },
   { to: '/admin/fonts', label: 'الخطوط', icon: TextCursorInput },
   { to: '/admin/activity', label: 'السجل والإحصائيات', icon: BarChart3 },
+  { to: '/admin/advanced-tools', label: 'أدوات الإدارة', icon: Wrench },
   { to: '/admin/users', label: 'المستخدمون', icon: Users, superAdminOnly: true },
   { to: '/admin/settings', label: 'الإعدادات', icon: Settings },
   { to: '/admin/account', label: 'حسابي', icon: UserCircle },

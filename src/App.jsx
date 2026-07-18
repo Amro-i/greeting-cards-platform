@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicCardPage from './pages/PublicCardPage';
 
 const AccountPage = lazy(() => import('./pages/admin/AccountPage'));
+const AdvancedToolsPage = lazy(() => import('./pages/admin/AdvancedToolsPage'));
 const ActivityPage = lazy(() => import('./pages/admin/ActivityPage'));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 const FontsPage = lazy(() => import('./pages/admin/FontsPage'));
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="templates/:templateId/editor" element={lazyPage(TemplateEditorPage)} />
           <Route path="fonts" element={lazyPage(FontsPage)} />
           <Route path="activity" element={lazyPage(ActivityPage)} />
+          <Route path="advanced-tools" element={lazyPage(AdvancedToolsPage)} />
           <Route path="settings" element={lazyPage(SettingsPage)} />
           <Route path="account" element={lazyPage(AccountPage)} />
         </Route>
