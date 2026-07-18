@@ -9,6 +9,7 @@ import {
   ImageIcon,
   LoaderCircle,
   RectangleHorizontal,
+  RectangleVertical,
   RefreshCw,
   RotateCcw,
   ShieldCheck,
@@ -207,6 +208,15 @@ export default function PublicCardPage({ adminPreview = false }) {
     && englishName.trim()
     && !generating,
   );
+  const previewIsPortrait = selectedTemplate ? selectedTemplate.image_height > selectedTemplate.image_width : false;
+  const previewMaxWidth = previewIsPortrait ? 420 : 760;
+  const previewViewportStyle = selectedTemplate
+    ? {
+        aspectRatio: String(selectedTemplate.image_width) + ' / ' + String(selectedTemplate.image_height),
+        width: '100%',
+        maxWidth: String(previewMaxWidth) + 'px',
+      }
+    : undefined;
 
   function clearGeneratedCard() {
     setGeneratedUrl((current) => {
@@ -400,7 +410,7 @@ export default function PublicCardPage({ adminPreview = false }) {
               onClick={() => changeShape('rectangle')}
               disabled={!templatesByShape.rectangle}
             >
-              <RectangleHorizontal size={27} />
+              <RectangleVertical size={22} />
               <span><strong>مستطيل</strong><small>{templatesByShape.rectangle ? 'متاح' : 'غير متاح'}</small></span>
               {selectedShape === 'rectangle' && <CheckCircle2 size={18} />}
             </button>
@@ -432,32 +442,36 @@ export default function PublicCardPage({ adminPreview = false }) {
             <div><ImageIcon size={20} /><span><strong>{generatedUrl ? 'البطاقة النهائية' : 'معاينة البطاقة'}</strong><small>{selectedTemplate ? `${selectedTemplate.image_width} × ${selectedTemplate.image_height} px` : 'اختر قالبًا متاحًا'}</small></span></div>
           </div>
 
-          {generatedUrl ? (
+          
+{generatedUrl ? (
             <div className="generated-card-preview">
-              <img src={generatedUrl} alt="البطاقة النهائية" />
+              <div className="public-design-stage-wrap is-generated">
+                <img src={generatedUrl} alt="البطاقة النهائية" className="generated-card-image" />
+              </div>
               <span><CheckCircle2 size={18} /> تم إنشاء JPG بجودة عالية</span>
             </div>
           ) : selectedTemplate && selectedTextSettings ? (
-            <div
-              ref={previewRef}
-              className="public-design-stage"
-              style={{ aspectRatio: `${selectedTemplate.image_width} / ${selectedTemplate.image_height}` }}
-            >
-              <img src={getTemplatePublicUrl(selectedTemplate.image_path)} alt={selectedTemplate.name} />
-              <CardNamePreview
-                value={arabicName}
-                settings={selectedTextSettings.ar}
-                language="ar"
-                templateWidth={selectedTemplate.image_width}
-                previewScale={previewScale}
-              />
-              <CardNamePreview
-                value={englishName}
-                settings={selectedTextSettings.en}
-                language="en"
-                templateWidth={selectedTemplate.image_width}
-                previewScale={previewScale}
-              />
+            <div ref={previewRef} className="public-design-stage-wrap">
+              <div
+                className="public-design-stage"
+                style={previewViewportStyle}
+              >
+                <img src={getTemplatePublicUrl(selectedTemplate.image_path)} alt={selectedTemplate.name} />
+                <CardNamePreview
+                  value={arabicName}
+                  settings={selectedTextSettings.ar}
+                  language="ar"
+                  templateWidth={selectedTemplate.image_width}
+                  previewScale={previewScale}
+                />
+                <CardNamePreview
+                  value={englishName}
+                  settings={selectedTextSettings.en}
+                  language="en"
+                  templateWidth={selectedTemplate.image_width}
+                  previewScale={previewScale}
+                />
+              </div>
             </div>
           ) : (
             <div className="no-public-template"><ImageIcon size={35} /><strong>لا يوجد قالب متاح</strong><span>فعّل قالبًا واحدًا على الأقل من صفحة القوالب.</span></div>
