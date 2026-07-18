@@ -2,14 +2,16 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicCardPage from './pages/PublicCardPage';
+import AccountPage from './pages/admin/AccountPage';
 import ActivityPage from './pages/admin/ActivityPage';
 import DashboardPage from './pages/admin/DashboardPage';
+import FontsPage from './pages/admin/FontsPage';
 import LoginPage from './pages/admin/LoginPage';
 import OccasionsPage from './pages/admin/OccasionsPage';
-import FontsPage from './pages/admin/FontsPage';
-import PlaceholderPage from './pages/admin/PlaceholderPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import TemplateEditorPage from './pages/admin/TemplateEditorPage';
 import TemplatesPage from './pages/admin/TemplatesPage';
+import UsersPage from './pages/admin/UsersPage';
 
 export default function App() {
   return (
@@ -25,13 +27,14 @@ export default function App() {
           <Route path="templates/:templateId/editor" element={<TemplateEditorPage />} />
           <Route path="fonts" element={<FontsPage />} />
           <Route path="activity" element={<ActivityPage />} />
-          <Route path="settings" element={<PlaceholderPage title="الإعدادات" description="إعدادات المنصة والرسائل العامة." />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="account" element={<AccountPage />} />
         </Route>
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
         <Route path="/admin/users" element={<AdminLayout />}>
-          <Route index element={<PlaceholderPage title="مستخدمو الإدارة" description="إنشاء الحسابات وتحديد الصلاحيات." actionLabel="إضافة مستخدم" />} />
+          <Route index element={<UsersPage />} />
         </Route>
       </Route>
 

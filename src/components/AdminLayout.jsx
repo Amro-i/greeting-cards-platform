@@ -6,6 +6,7 @@ import {
   LogOut,
   Settings,
   TextCursorInput,
+  UserCircle,
   Users,
 } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
@@ -19,6 +20,7 @@ const links = [
   { to: '/admin/activity', label: 'السجل والإحصائيات', icon: BarChart3 },
   { to: '/admin/users', label: 'المستخدمون', icon: Users, superAdminOnly: true },
   { to: '/admin/settings', label: 'الإعدادات', icon: Settings },
+  { to: '/admin/account', label: 'حسابي', icon: UserCircle },
 ];
 
 const roleLabels = {
