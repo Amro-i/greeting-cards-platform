@@ -4,7 +4,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicCardPage from './pages/PublicCardPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import LoginPage from './pages/admin/LoginPage';
+import OccasionsPage from './pages/admin/OccasionsPage';
 import PlaceholderPage from './pages/admin/PlaceholderPage';
+import TemplatesPage from './pages/admin/TemplatesPage';
 
 export default function App() {
   return (
@@ -15,8 +17,8 @@ export default function App() {
       <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'viewer']} />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="occasions" element={<PlaceholderPage title="المناسبات" description="إنشاء المناسبات وتحديد مدة ظهورها." actionLabel="إضافة مناسبة" />} />
-          <Route path="templates" element={<PlaceholderPage title="القوالب" description="إدارة القوالب المربعة والمستطيلة." actionLabel="رفع قالب" />} />
+          <Route path="occasions" element={<OccasionsPage />} />
+          <Route path="templates" element={<TemplatesPage />} />
           <Route path="fonts" element={<PlaceholderPage title="الخطوط" description="إدارة الخطوط المتاحة داخل محرر القوالب." actionLabel="إضافة خط" />} />
           <Route path="activity" element={<PlaceholderPage title="السجل والإحصائيات" description="متابعة الأشخاص والبطاقات التي تم إنشاؤها." />} />
           <Route path="settings" element={<PlaceholderPage title="الإعدادات" description="إعدادات المنصة والرسائل العامة." />} />
