@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import CardNamePreview from '../components/CardNamePreview';
+import '../styles/publicPreviewCompact.css';
 import { getBrandAssetUrl, useAppSettings } from '../context/AppSettingsContext';
 import { makeCardFileName, renderGreetingCard } from '../lib/cardRenderer';
 import { findDefaultFont, loadFonts, normalizeTextSettings } from '../lib/fontUtils';
@@ -209,7 +210,7 @@ export default function PublicCardPage({ adminPreview = false }) {
     && !generating,
   );
   const previewIsPortrait = selectedTemplate ? selectedTemplate.image_height > selectedTemplate.image_width : false;
-  const previewMaxWidth = previewIsPortrait ? 420 : 760;
+  const previewMaxWidth = previewIsPortrait ? 260 : 620;
   const previewViewportStyle = selectedTemplate
     ? {
         aspectRatio: String(selectedTemplate.image_width) + ' / ' + String(selectedTemplate.image_height),
@@ -445,14 +446,15 @@ export default function PublicCardPage({ adminPreview = false }) {
           
 {generatedUrl ? (
             <div className="generated-card-preview">
-              <div className="public-design-stage-wrap is-generated">
+              <div className="public-design-stage-wrap is-generated" style={{ maxWidth: `${previewMaxWidth}px` }}>
                 <img src={generatedUrl} alt="البطاقة النهائية" className="generated-card-image" />
               </div>
               <span><CheckCircle2 size={18} /> تم إنشاء JPG بجودة عالية</span>
             </div>
           ) : selectedTemplate && selectedTextSettings ? (
-            <div ref={previewRef} className="public-design-stage-wrap">
+            <div className="public-design-stage-wrap">
               <div
+                ref={previewRef}
                 className="public-design-stage"
                 style={previewViewportStyle}
               >
