@@ -1213,3 +1213,77 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 }
 .success-message { padding: 10px 13px; border: 1px solid #bfe3d1; border-radius: 10px; color: #2d7452; background: #eefaf4; }
 .table-loading { min-height: 220px; display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--muted); }
+
+/* Package 7: occasion links, public picker and safe admin preview */
+.occasion-card-actions { flex-wrap: wrap; }
+.occasion-card-actions .secondary-button,
+.occasion-card-actions .primary-button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.occasion-picker-main { display: block; padding: 44px clamp(18px, 5vw, 76px) 58px; }
+.public-occasion-picker { width: min(1180px, 100%); margin: 0 auto; }
+.picker-heading { max-width: 720px; margin: 0 auto 28px; text-align: center; }
+.picker-heading .eyebrow { display: inline-flex; align-items: center; gap: 7px; }
+.picker-heading h1 { margin: 8px 0 5px; font-size: clamp(31px, 4vw, 46px); }
+.picker-heading p { margin: 0; color: var(--muted); font-size: 17px; }
+.occasion-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.occasion-choice-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(229,227,239,.95);
+  border-radius: 20px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 14px 38px rgba(48,42,94,.07);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.occasion-choice-card:hover { transform: translateY(-4px); border-color: #c9c3e7; box-shadow: 0 20px 48px rgba(48,42,94,.12); }
+.choice-preview {
+  aspect-ratio: 16 / 10;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--primary);
+  background: linear-gradient(145deg, #eeeafd, #faf9ff);
+}
+.choice-preview img { width: 100%; height: 100%; object-fit: cover; }
+.choice-body { padding: 18px; }
+.choice-body h2 { margin: 0; font-size: 22px; }
+.choice-body p { margin: 3px 0 16px; color: var(--muted); }
+.choice-body > span { display: inline-flex; align-items: center; gap: 6px; color: var(--primary-dark); font-weight: 600; }
+.empty-home-button { display: inline-flex; margin-top: 22px; }
+.admin-occasion-preview-page { min-height: 640px; padding: 2px 0 20px; }
+.admin-preview-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 15px 17px;
+  border: 1px solid #d8d1f7;
+  border-radius: 15px;
+  color: var(--primary-dark);
+  background: #f4f1ff;
+}
+.admin-preview-banner > div { display: flex; align-items: center; gap: 10px; }
+.admin-preview-banner strong,
+.admin-preview-banner small { display: block; }
+.admin-preview-banner small { margin-top: 2px; color: #716a91; font-weight: 400; }
+.admin-preview-banner .secondary-button { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; }
+.admin-preview-empty { margin: 70px auto; }
+
+@media (max-width: 1000px) {
+  .occasion-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .occasion-choice-grid { grid-template-columns: 1fr; }
+  .admin-preview-banner { align-items: stretch; flex-direction: column; }
+  .admin-preview-banner .secondary-button { width: 100%; }
+  .occasion-card-actions { width: 100%; }
+  .occasion-card-actions .secondary-button { flex: 1 1 140px; }
+}

@@ -2,13 +2,17 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CalendarClock,
   CalendarPlus,
+  Check,
+  Copy,
   Edit3,
+  Eye,
   Image as ImageIcon,
   LoaderCircle,
   Plus,
   Trash2,
   X,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ConfirmModal from '../../components/ConfirmModal';
 import TemplateImageField from '../../components/TemplateImageField';
 import { useAuth } from '../../context/AuthContext';
@@ -66,6 +70,7 @@ export default function OccasionsPage() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [copiedId, setCopiedId] = useState('');
 
   const loadOccasions = useCallback(async () => {
     setLoading(true);
@@ -143,20 +148,25 @@ export default function OccasionsPage() {
     setForm((current) => ({ ...current, [name]: value }));
   }
 
-  async function findScheduleConflict(startsAt, endsAt, currentId) {
-    let query = supabase
-      .from('occasions')
-      .select('id, title_ar, starts_at, ends_at')
-      .eq('status', 'active')
-      .lt('starts_at', endsAt)
-      .gt('ends_at', startsAt)
-      .limit(1);
-
-    if (currentId) query = query.neq('id', currentId);
-    const { data, error } = await query;
-    if (error) throw error;
-    return data?.[0] || null;
+  async function copyPublicLink(occasion) {
+    const url = `${window.location.origin}/occasion/${occasion.slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      const input = document.createElement('textarea');
+      input.value = url;
+      input.style.position = 'fixed';
+      input.style.opacity = '0';
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      input.remove();
+    }
+    setCopiedId(occasion.id);
+    setNotice('تم نسخ رابط المناسبة.');
+    window.setTimeout(() => setCopiedId((current) => (current === occasion.id ? '' : current)), 2200);
   }
+
 
   async function uploadTemplate(file, occasionId, shape) {
     const dimensions = await readImageDimensions(file);
@@ -246,13 +256,6 @@ export default function OccasionsPage() {
     setSaving(true);
 
     try {
-      if (form.status === 'active') {
-        const conflict = await findScheduleConflict(startsAt, endsAt, editingOccasion?.id);
-        if (conflict) {
-          throw new Error(`يتداخل التوقيت مع المناسبة: ${conflict.title_ar}`);
-        }
-      }
-
       const squareUpload = form.squareFile
         ? await uploadTemplate(form.squareFile, occasionId, 'square')
         : null;
@@ -343,7 +346,7 @@ export default function OccasionsPage() {
       <div className="page-heading">
         <div>
           <h1>المناسبات</h1>
-          <p>إنشاء المناسبات وتحديد وقت ظهورها ورفع القوالب الأساسية.</p>
+          <p>إنشاء المناسبات وتحديد وقت ظهورها ورفع القوالب ومشاركة رابط مستقل لكل مناسبة.</p>
         </div>
         {canManage && (
           <button className="primary-button" type="button" onClick={openCreate}>
@@ -408,16 +411,25 @@ export default function OccasionsPage() {
                   </div>
                 </div>
 
-                {canManage && (
-                  <div className="occasion-card-actions">
-                    <button className="secondary-button" type="button" onClick={() => openEdit(occasion)}>
-                      <Edit3 size={17} /> تعديل
-                    </button>
-                    <button className="icon-button danger-icon" type="button" aria-label="حذف المناسبة" onClick={() => setDeleteTarget(occasion)}>
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                )}
+                <div className="occasion-card-actions">
+                  <Link className="secondary-button" to={`/admin/occasions/${occasion.id}/preview`}>
+                    <Eye size={17} /> معاينة
+                  </Link>
+                  <button className="secondary-button" type="button" onClick={() => copyPublicLink(occasion)}>
+                    {copiedId === occasion.id ? <Check size={17} /> : <Copy size={17} />}
+                    {copiedId === occasion.id ? 'تم النسخ' : 'نسخ الرابط'}
+                  </button>
+                  {canManage && (
+                    <>
+                      <button className="secondary-button" type="button" onClick={() => openEdit(occasion)}>
+                        <Edit3 size={17} /> تعديل
+                      </button>
+                      <button className="icon-button danger-icon" type="button" aria-label="حذف المناسبة" onClick={() => setDeleteTarget(occasion)}>
+                        <Trash2 size={18} />
+                      </button>
+                    </>
+                  )}
+                </div>
               </article>
             );
           })}
@@ -467,14 +479,14 @@ export default function OccasionsPage() {
                       <option value="disabled">معطلة</option>
                       <option value="ended">منتهية يدويًا</option>
                     </select>
-                    <small>عند اختيار «مفعلة»، ستظهر تلقائيًا داخل الفترة المحددة، وتظهر «مجدولة» قبل بدايتها.</small>
+                    <small>عند اختيار «مفعلة»، ستظهر تلقائيًا داخل الفترة المحددة. يمكن تفعيل أكثر من مناسبة في الوقت نفسه.</small>
                   </label>
                 </div>
               </div>
 
               <div className="form-section">
                 <h3>قوالب المناسبة</h3>
-                <p className="section-hint">يمكن رفع قالب واحد أو القالبين. تحديد موضع النص سيضاف في الحزمة التالية.</p>
+                <p className="section-hint">يمكن رفع قالب واحد أو القالبين، ثم ضبط مواضع النص من صفحة القوالب.</p>
                 <div className="template-fields-grid">
                   <TemplateImageField
                     label="القالب المربع"

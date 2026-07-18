@@ -17,12 +17,14 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<PublicCardPage />} />
+      <Route path="/occasion/:slug" element={<PublicCardPage />} />
       <Route path="/admin/login" element={<LoginPage />} />
 
       <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'viewer']} />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="occasions" element={<OccasionsPage />} />
+          <Route path="occasions/:occasionId/preview" element={<PublicCardPage adminPreview />} />
           <Route path="templates" element={<TemplatesPage />} />
           <Route path="templates/:templateId/editor" element={<TemplateEditorPage />} />
           <Route path="fonts" element={<FontsPage />} />
