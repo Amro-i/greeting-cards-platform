@@ -124,11 +124,11 @@ export default function SettingsPage() {
             </label>
           </div>
 
-          <div className="settings-section-title with-top-border"><ImageIcon size={21} /><div><strong>صور الهوية</strong><span>PNG أو JPG أو WEBP، بحد أقصى 5 MB لكل صورة.</span></div></div>
+          <div className="settings-section-title with-top-border"><ImageIcon size={21} /><div><strong>صور الهوية</strong><span>ارفع PNG أو JPG أو WEBP، وستضبط المنصة المقاس تلقائيًا قبل الحفظ.</span></div></div>
           <div className="brand-assets-grid">
             <BrandAssetField
               label="شعار المنصة"
-              hint="يفضل شعار مربع بخلفية شفافة."
+              hint="يمكن رفع أي مقاس مناسب؛ يُحتوى الشعار تلقائيًا دون قص."
               value={form.logo_path || ''}
               folder="logos"
               onChange={(value) => updateField('logo_path', value)}
@@ -137,7 +137,7 @@ export default function SettingsPage() {
             />
             <BrandAssetField
               label="صورة غلاف الصفحة العامة"
-              hint="يفضل صورة أفقية عريضة."
+              hint="يمكن رفع أي صورة مناسبة؛ تُقص من المنتصف تلقائيًا لتناسب الغلاف."
               value={form.cover_path || ''}
               folder="covers"
               onChange={(value) => updateField('cover_path', value)}
