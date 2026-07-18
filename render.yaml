@@ -2,7 +2,7 @@ services:
   - type: web
     name: greeting-cards-platform
     runtime: static
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --include=dev --no-audit --no-fund && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_SUPABASE_URL
@@ -11,6 +11,8 @@ services:
         sync: false
       - key: NODE_VERSION
         value: 20.19.0
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
     routes:
       - type: rewrite
         source: /*
