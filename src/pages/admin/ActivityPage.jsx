@@ -60,12 +60,12 @@ function endOfDateIso(value) {
 }
 
 function formatNumber(value) {
-  return new Intl.NumberFormat('ar-SA-u-nu-latn').format(Number(value || 0));
+  return new Intl.NumberFormat('en-US-u-nu-latn-ca-gregory').format(Number(value || 0));
 }
 
 function formatDateTime(value) {
   if (!value) return '—';
-  return new Intl.DateTimeFormat('ar-SA-u-nu-latn', {
+  return new Intl.DateTimeFormat('en-US-u-nu-latn-ca-gregory', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -225,7 +225,7 @@ export default function ActivityPage() {
       const key = date.toISOString().slice(0, 10);
       dayMap.set(key, {
         key,
-        label: new Intl.DateTimeFormat('ar-SA-u-nu-latn', { day: 'numeric', month: 'short' }).format(date),
+        label: new Intl.DateTimeFormat('en-US-u-nu-latn-ca-gregory', { day: 'numeric', month: 'short' }).format(date),
         value: 0,
       });
     }

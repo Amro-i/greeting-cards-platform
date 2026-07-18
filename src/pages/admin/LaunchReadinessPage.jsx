@@ -165,7 +165,7 @@ export default function LaunchReadinessPage() {
     const content = [
       'منصة بطاقات تهنئة — قائمة الإطلاق النهائية',
       `الإصدار: ${RELEASE_VERSION}`,
-      `تاريخ التصدير: ${new Date().toLocaleString('ar-SA-u-nu-latn')}`,
+      `تاريخ التصدير: ${new Date().toLocaleString('en-US-u-nu-latn-ca-gregory')}`,
       '',
       'الفحوص التقنية:',
       ...technicalLines,

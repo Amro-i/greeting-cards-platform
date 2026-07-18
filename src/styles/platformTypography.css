@@ -1,0 +1,269 @@
+/* Unified bilingual typography and Latin numerals across the platform */
+@font-face {
+  font-family: 'Greeting UI';
+  src: url('/fonts/GE-Thameen-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F, U+25CC;
+}
+@font-face {
+  font-family: 'Greeting UI';
+  src: url('/fonts/Aller-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF, U+20A0-20CF;
+}
+@font-face {
+  font-family: 'Greeting UI';
+  src: url('/fonts/GE-Thameen-Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F, U+25CC;
+}
+@font-face {
+  font-family: 'Greeting UI';
+  src: url('/fonts/Aller-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF, U+20A0-20CF;
+}
+@font-face {
+  font-family: 'Greeting UI';
+  src: url('/fonts/GE-Thameen-DemiBold.otf') format('opentype');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F, U+25CC;
+}
+@font-face {
+  font-family: 'Greeting UI';
+  src: url('/fonts/Aller-Bold.ttf') format('truetype');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+1E00-1EFF, U+20A0-20CF;
+}
+
+:root {
+  font-family: 'Greeting UI', Arial, sans-serif;
+  font-size: 15px;
+  font-synthesis: none;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: 'Greeting UI', Arial, sans-serif;
+}
+
+body {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+strong,
+b,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}
+
+[lang='en'],
+[dir='ltr'],
+code,
+time,
+input[type='number'],
+input[type='date'],
+input[type='datetime-local'],
+input[type='time'],
+output,
+.field-character-count,
+.role-pill,
+.sidebar-release {
+  font-family: 'Greeting UI', 'Aller', Arial, sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+}
+
+/* Admin shell typography scale */
+.admin-shell {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.45;
+}
+
+.sidebar {
+  font-size: 13.5px;
+  font-weight: 300;
+}
+.brand-box strong { font-size: 17px !important; line-height: 1.25; }
+.brand-box span { font-size: 12px !important; font-weight: 300; }
+.side-nav { gap: 4px; margin-top: 18px; }
+.side-nav a {
+  min-height: 42px;
+  gap: 9px;
+  padding: 9px 11px;
+  font-size: 13.5px;
+  font-weight: 300;
+}
+.side-nav a svg { width: 17px; height: 17px; }
+.sidebar-release { font-size: 11px !important; }
+.signout-button { min-height: 40px; padding: 9px; font-size: 13px; font-weight: 300; }
+
+.admin-topbar { height: 72px; padding: 0 26px; }
+.admin-topbar strong { font-size: 14px; font-weight: 600; }
+.muted-label { font-size: 11.5px !important; font-weight: 300; }
+.role-pill { padding: 5px 10px; font-size: 11.5px !important; font-weight: 400; }
+
+.admin-content { padding: 26px; }
+.page-heading { margin-bottom: 20px; }
+.page-heading h1 {
+  font-size: clamp(24px, 2vw, 27px) !important;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+.page-heading p { margin-top: 4px; font-size: 13.5px; font-weight: 300; line-height: 1.5; }
+
+.admin-content h2:not(.font-preview-ar):not(.font-preview-en) {
+  font-size: 18px;
+  line-height: 1.35;
+}
+.admin-content h3 { font-size: 15.5px; line-height: 1.4; }
+.admin-content p,
+.admin-content label,
+.admin-content td,
+.admin-content th,
+.admin-content dt,
+.admin-content dd {
+  font-size: 13.5px;
+  line-height: 1.48;
+}
+.admin-content small,
+.admin-content .muted-label,
+.admin-content .field-hint,
+.admin-content .settings-section-title span,
+.admin-content .card-section-heading small {
+  font-size: 11.75px !important;
+  font-weight: 300;
+  line-height: 1.45;
+}
+
+.admin-content button,
+.admin-content input,
+.admin-content select,
+.admin-content textarea {
+  font-size: 13.5px;
+  font-weight: 400;
+}
+.admin-content input,
+.admin-content select {
+  min-height: 42px;
+}
+.admin-content textarea { line-height: 1.5; }
+.primary-button,
+.secondary-button,
+.danger-button {
+  font-size: 13.5px;
+  font-weight: 400;
+}
+
+.content-card { padding: 22px; }
+.content-card h2 { margin-bottom: 8px; }
+.stat-card { padding: 18px; }
+.stat-card strong,
+.mini-stats-grid strong,
+.advanced-summary-grid article > div > strong {
+  font-family: 'Greeting UI', 'Aller', Arial, sans-serif;
+  font-size: 24px !important;
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.stat-card span,
+.mini-stats-grid span,
+.advanced-summary-grid span { font-size: 12.5px; font-weight: 300; }
+
+.drawer-header { padding: 20px 24px; }
+.drawer-header h2 { font-size: 23px !important; line-height: 1.25; }
+.drawer-header p { font-size: 13.5px; }
+.occasion-form { padding: 20px 24px 0; }
+.form-section-title,
+.settings-section-title strong,
+.card-section-heading strong,
+.account-section-heading strong {
+  font-size: 15.5px !important;
+  font-weight: 600;
+}
+
+.font-card h2 { font-size: 18px !important; line-height: 1.25; }
+.font-card-top p { font-size: 12px !important; }
+.font-badges span,
+.status-badge,
+.shape-badge { font-size: 11.5px !important; font-weight: 400; }
+.font-preview-ar { font-size: 22px !important; }
+.font-preview-en { font-size: 18px !important; }
+
+.template-card h2,
+.occasion-title-row h2 { font-size: 18px !important; }
+.template-details dt,
+.template-details dd,
+.occasion-dates span,
+.occasion-dates strong { font-size: 12.5px !important; }
+
+.settings-section-title { margin-top: 18px; }
+.settings-section-title svg { width: 18px; height: 18px; }
+.settings-form-card label { font-weight: 400; }
+.settings-preview-card > span { font-size: 11.5px; }
+
+.account-card label,
+.users-page label,
+.advanced-tools-page label { font-weight: 400; }
+.account-card input,
+.users-page input,
+.users-page select,
+.advanced-tools-page input,
+.advanced-tools-page select { font-size: 13.5px; }
+
+.audit-row strong { font-size: 14px; }
+.audit-row span,
+.audit-row time { font-size: 12px; font-weight: 300; }
+.table-pagination { font-size: 12.5px; }
+
+/* Always render platform numbers with Latin glyphs */
+.admin-shell :where(
+  .stat-card strong,
+  .mini-stats-grid strong,
+  .advanced-summary-grid strong,
+  .template-details dd,
+  .occasion-dates strong,
+  .table-pagination,
+  time,
+  code,
+  output,
+  input[type='number'],
+  input[type='date'],
+  input[type='datetime-local'],
+  .field-character-count
+) {
+  font-family: 'Aller', Arial, sans-serif !important;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+}
+
+@media (max-width: 760px) {
+  .admin-content { padding: 20px 15px; }
+  .page-heading h1 { font-size: 23px !important; }
+  .admin-content h2:not(.font-preview-ar):not(.font-preview-en) { font-size: 17px; }
+  .drawer-header h2 { font-size: 21px !important; }
+}
