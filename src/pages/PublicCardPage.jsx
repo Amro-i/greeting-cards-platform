@@ -11,7 +11,6 @@ import {
   RectangleVertical,
   RefreshCw,
   RotateCcw,
-  ShieldCheck,
   Sparkles,
   Square,
 } from 'lucide-react';
@@ -65,7 +64,7 @@ function BilingualText({ ar, en, className = '', as = 'span' }) {
   return (
     <Tag className={`bilingual-text ${className}`.trim()}>
       <span>{ar}</span>
-      <span className="bilingual-en" lang="en" dir="ltr">{en}</span>
+      <span className="bilingual-en" lang="en" dir="rtl">{en}</span>
     </Tag>
   );
 }
@@ -440,7 +439,7 @@ export default function PublicCardPage({ adminPreview = false }) {
               placeholder="Example: Mohammed Ahmed"
               maxLength={100}
               autoComplete="name"
-              dir="ltr"
+              dir="rtl"
               lang="en"
             />
             <small className="field-character-count">{englishName.length}/100</small>
@@ -578,20 +577,18 @@ export default function PublicCardPage({ adminPreview = false }) {
 
   return (
     <div className="public-page">
-      <header className="public-header">
-        <Link to="/" className="public-brand">
-          {settings.logo_path ? (
-            <div className="brand-logo"><img src={getBrandAssetUrl(settings.logo_path)} alt={settings.platform_name_ar} /></div>
-          ) : <div className="brand-mark">ب</div>}
-          <div>
-            <strong>{settings.platform_name_ar}</strong>
-            <span>{settings.platform_name_en}</span>
-          </div>
+      <header className="public-header public-header--brand">
+        <Link to="/" className="public-brand-title" aria-label={settings.platform_name_ar}>
+          <strong>{settings.platform_name_ar}</strong>
+          <span>{settings.platform_name_en}</span>
         </Link>
-        <a href="/admin/login" className="admin-link">
-          <ShieldCheck size={18} />
-          <BilingualText ar="دخول الإدارة" en="Admin Login" />
-        </a>
+        <Link to="/" className="public-header-logo" aria-label={settings.platform_name_ar}>
+          {settings.logo_path ? (
+            <img src={getBrandAssetUrl(settings.logo_path)} alt={settings.platform_name_ar} />
+          ) : (
+            <span className="public-header-logo-fallback">ب</span>
+          )}
+        </Link>
       </header>
 
       {settings.cover_path && (
