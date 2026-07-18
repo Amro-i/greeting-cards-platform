@@ -210,7 +210,7 @@ export default function PublicCardPage({ adminPreview = false }) {
     && !generating,
   );
   const previewIsPortrait = selectedTemplate ? selectedTemplate.image_height > selectedTemplate.image_width : false;
-  const previewMaxWidth = previewIsPortrait ? 260 : 620;
+  const previewMaxWidth = selectedShape === 'rectangle' ? 300 : 430;
   const previewViewportStyle = selectedTemplate
     ? {
         aspectRatio: String(selectedTemplate.image_width) + ' / ' + String(selectedTemplate.image_height),
