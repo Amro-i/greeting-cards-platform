@@ -332,3 +332,16 @@
   margin-inline-start: auto;
   white-space: nowrap;
 }
+
+/* Public name inputs: use the light font while typing */
+.public-page .public-field input {
+  font-family: 'GE Thameen', Arial, sans-serif !important;
+  font-weight: 300 !important;
+  font-synthesis: none;
+}
+
+.public-page .public-field input[lang='en'] {
+  font-family: 'Aller', Arial, sans-serif !important;
+  font-weight: 300 !important;
+  font-synthesis: none;
+}
