@@ -500,7 +500,6 @@ export default function PublicCardPage({ adminPreview = false }) {
             <span>1</span>
             <div>
               <BilingualText as="strong" ar="أدخل الأسماء" en="Enter Names" />
-              <BilingualText as="small" ar="سيظهر كل اسم في مكانه المحدد داخل القالب." en="Each name will appear in its assigned position on the card." />
             </div>
           </div>
 
