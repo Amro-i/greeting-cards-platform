@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { getFriendlyClientError, retryOperation, withTimeout } from '../lib/reliability';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
@@ -26,18 +27,29 @@ export function AuthProvider({ children }) {
       setProfileError('');
     }
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, full_name, role, is_active')
-      .eq('id', userId)
-      .maybeSingle();
+    let data;
+    let error;
+    try {
+      const result = await retryOperation(
+        () => withTimeout(() => supabase
+          .from('profiles')
+          .select('id, full_name, role, is_active')
+          .eq('id', userId)
+          .maybeSingle(), 15_000, 'استغرق تحميل صلاحيات الحساب وقتًا طويلًا.'),
+        { attempts: 2, shouldRetry: () => navigator.onLine },
+      );
+      data = result.data;
+      error = result.error;
+    } catch (requestError) {
+      error = requestError;
+    }
 
     if (!mountedRef.current || requestId !== profileRequestRef.current) return;
 
     if (error) {
       console.error('Profile load error:', error.message);
       setProfile(null);
-      setProfileError(error.message || 'تعذر تحميل صلاحيات الحساب.');
+      setProfileError(getFriendlyClientError(error, 'تعذر تحميل صلاحيات الحساب.'));
     } else {
       setProfile(data ?? null);
     }
@@ -56,25 +68,27 @@ export function AuthProvider({ children }) {
     }
 
     async function initializeAuth() {
-      const { data, error } = await supabase.auth.getSession();
-      if (!mountedRef.current) return;
+      try {
+        const { data, error } = await withTimeout(() => supabase.auth.getSession(), 15_000, 'استغرق التحقق من الجلسة وقتًا طويلًا.');
+        if (!mountedRef.current) return;
 
-      if (error) {
-        console.error('Session load error:', error.message);
+        if (error) throw error;
+
+        const initialSession = data.session ?? null;
+        setSession(initialSession);
+
+        if (initialSession?.user) {
+          await loadProfile(initialSession.user.id);
+        } else {
+          setProfile(null);
+          setLoading(false);
+        }
+      } catch (sessionError) {
+        if (!mountedRef.current) return;
+        console.error('Session load error:', sessionError?.message);
         setSession(null);
         setProfile(null);
-        setProfileError(error.message);
-        setLoading(false);
-        return;
-      }
-
-      const initialSession = data.session ?? null;
-      setSession(initialSession);
-
-      if (initialSession?.user) {
-        await loadProfile(initialSession.user.id);
-      } else {
-        setProfile(null);
+        setProfileError(getFriendlyClientError(sessionError, 'تعذر التحقق من الجلسة.'));
         setLoading(false);
       }
     }
@@ -115,10 +129,10 @@ export function AuthProvider({ children }) {
       isConfigured: isSupabaseConfigured,
       signIn: async (email, password) => {
         if (!supabase) throw new Error('Supabase is not configured.');
-        return supabase.auth.signInWithPassword({ email, password });
+        return withTimeout(() => supabase.auth.signInWithPassword({ email, password }), 20_000, 'استغرق تسجيل الدخول وقتًا طويلًا.');
       },
       signOut: async () => {
-        if (supabase) await supabase.auth.signOut();
+        if (supabase) await withTimeout(() => supabase.auth.signOut(), 12_000, 'استغرق تسجيل الخروج وقتًا طويلًا.');
       },
       reloadProfile: async () => {
         if (session?.user) await loadProfile(session.user.id);

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { getFriendlyClientError, withTimeout } from '../lib/reliability';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 export const DEFAULT_APP_SETTINGS = {
@@ -48,20 +49,28 @@ export function AppSettingsProvider({ children }) {
 
     setLoading(true);
     setError('');
-    const { data, error: loadError } = await supabase
-      .from('app_settings')
-      .select('*')
-      .eq('id', true)
-      .maybeSingle();
-
-    if (loadError) {
-      setError(loadError.message || 'تعذر تحميل إعدادات المنصة.');
+    let result;
+    try {
+      result = await withTimeout(() => supabase
+        .from('app_settings')
+        .select('*')
+        .eq('id', true)
+        .maybeSingle(), 15_000, 'استغرق تحميل إعدادات المنصة وقتًا طويلًا.');
+    } catch (loadError) {
+      setError(getFriendlyClientError(loadError, 'تعذر تحميل إعدادات المنصة.'));
       setSettings(DEFAULT_APP_SETTINGS);
       setLoading(false);
       return DEFAULT_APP_SETTINGS;
     }
 
-    const next = normalizeSettings(data);
+    if (result.error) {
+      setError(getFriendlyClientError(result.error, 'تعذر تحميل إعدادات المنصة.'));
+      setSettings(DEFAULT_APP_SETTINGS);
+      setLoading(false);
+      return DEFAULT_APP_SETTINGS;
+    }
+
+    const next = normalizeSettings(result.data);
     setSettings(next);
     setLoading(false);
     return next;

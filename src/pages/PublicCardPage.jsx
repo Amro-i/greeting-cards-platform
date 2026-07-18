@@ -9,16 +9,19 @@ import {
   ImageIcon,
   LoaderCircle,
   RectangleHorizontal,
+  RefreshCw,
   RotateCcw,
   ShieldCheck,
   Sparkles,
   Square,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import CardNamePreview from '../components/CardNamePreview';
 import { getBrandAssetUrl, useAppSettings } from '../context/AppSettingsContext';
 import { makeCardFileName, renderGreetingCard } from '../lib/cardRenderer';
 import { findDefaultFont, loadFonts, normalizeTextSettings } from '../lib/fontUtils';
 import { getFriendlySupabaseError, getTemplatePublicUrl } from '../lib/occasionUtils';
+import { createRequestKey, getFriendlyClientError, normalizePersonName, retryOperation, withTimeout } from '../lib/reliability';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 
@@ -59,6 +62,7 @@ function getOccasionThumbnail(occasion) {
 export default function PublicCardPage({ adminPreview = false }) {
   const { slug, occasionId } = useParams();
   const previewRef = useRef(null);
+  const generationLockRef = useRef(false);
   const { settings, loading: settingsLoading } = useAppSettings();
   const [loading, setLoading] = useState(isSupabaseConfigured);
   const [occasion, setOccasion] = useState(null);
@@ -74,10 +78,51 @@ export default function PublicCardPage({ adminPreview = false }) {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [missingRequestedOccasion, setMissingRequestedOccasion] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     if (!supabase) return;
     let active = true;
+
+    function buildOccasionQuery(now) {
+      if (adminPreview && occasionId) {
+        return supabase
+          .from('occasions')
+          .select(OCCASION_SELECT)
+          .eq('id', occasionId)
+          .maybeSingle();
+      }
+      if (slug) {
+        return supabase
+          .from('occasions')
+          .select(OCCASION_SELECT)
+          .eq('slug', slug)
+          .eq('status', 'active')
+          .lte('starts_at', now)
+          .gte('ends_at', now)
+          .maybeSingle();
+      }
+      return supabase
+        .from('occasions')
+        .select(OCCASION_SELECT)
+        .eq('status', 'active')
+        .lte('starts_at', now)
+        .gte('ends_at', now)
+        .order('starts_at', { ascending: false });
+    }
+
+    async function requestPageData() {
+      const now = new Date().toISOString();
+      return withTimeout(() => Promise.all([
+        buildOccasionQuery(now),
+        supabase
+          .from('fonts')
+          .select('id, display_name, family_name, language, weight, style, storage_path, is_system, is_active')
+          .eq('is_active', true)
+          .order('is_system', { ascending: false })
+          .order('display_name'),
+      ]), 20_000, 'استغرق تحميل المناسبة وقتًا طويلًا.');
+    }
 
     async function loadPageData() {
       setLoading(true);
@@ -87,65 +132,40 @@ export default function PublicCardPage({ adminPreview = false }) {
       setActiveOccasions([]);
       setMissingRequestedOccasion(false);
 
-      const now = new Date().toISOString();
-      let occasionQuery;
+      try {
+        const [occasionResult, fontsResult] = await retryOperation(requestPageData, {
+          attempts: 2,
+          shouldRetry: () => navigator.onLine,
+        });
 
-      if (adminPreview && occasionId) {
-        occasionQuery = supabase
-          .from('occasions')
-          .select(OCCASION_SELECT)
-          .eq('id', occasionId)
-          .maybeSingle();
-      } else if (slug) {
-        occasionQuery = supabase
-          .from('occasions')
-          .select(OCCASION_SELECT)
-          .eq('slug', slug)
-          .eq('status', 'active')
-          .lte('starts_at', now)
-          .gte('ends_at', now)
-          .maybeSingle();
-      } else {
-        occasionQuery = supabase
-          .from('occasions')
-          .select(OCCASION_SELECT)
-          .eq('status', 'active')
-          .lte('starts_at', now)
-          .gte('ends_at', now)
-          .order('starts_at', { ascending: false });
+        if (!active) return;
+        if (occasionResult.error || fontsResult.error) {
+          throw occasionResult.error || fontsResult.error;
+        }
+
+        const availableFonts = fontsResult.data || [];
+        setFonts(availableFonts);
+        await loadFonts(availableFonts);
+
+        if (adminPreview || slug) {
+          setOccasion(occasionResult.data || null);
+          setMissingRequestedOccasion(!occasionResult.data);
+        } else {
+          const occasions = occasionResult.data || [];
+          setActiveOccasions(occasions);
+          if (occasions.length === 1) setOccasion(occasions[0]);
+        }
+      } catch (loadError) {
+        if (!active) return;
+        setError(getFriendlyClientError(loadError, getFriendlySupabaseError(loadError)));
+      } finally {
+        if (active) setLoading(false);
       }
-
-      const [occasionResult, fontsResult] = await Promise.all([
-        occasionQuery,
-        supabase
-          .from('fonts')
-          .select('id, display_name, family_name, language, weight, style, storage_path, is_system, is_active')
-          .eq('is_active', true)
-          .order('is_system', { ascending: false })
-          .order('display_name'),
-      ]);
-
-      if (!active) return;
-      if (occasionResult.error || fontsResult.error) {
-        setError(getFriendlySupabaseError(occasionResult.error || fontsResult.error));
-      }
-      setFonts(fontsResult.data || []);
-      void loadFonts(fontsResult.data || []);
-
-      if (adminPreview || slug) {
-        setOccasion(occasionResult.data || null);
-        setMissingRequestedOccasion(!occasionResult.data);
-      } else {
-        const occasions = occasionResult.data || [];
-        setActiveOccasions(occasions);
-        if (occasions.length === 1) setOccasion(occasions[0]);
-      }
-      setLoading(false);
     }
 
     void loadPageData();
     return () => { active = false; };
-  }, [adminPreview, occasionId, slug]);
+  }, [adminPreview, occasionId, slug, reloadToken]);
 
   useEffect(() => {
     if (!previewRef.current) return undefined;
@@ -205,10 +225,13 @@ export default function PublicCardPage({ adminPreview = false }) {
 
   async function handleGenerate(event) {
     event.preventDefault();
-    if (!selectedTemplate || !selectedTextSettings) return;
+    if (!selectedTemplate || !selectedTextSettings || generationLockRef.current) return;
 
-    const arName = arabicName.trim();
-    const enName = englishName.trim();
+    const arName = normalizePersonName(arabicName);
+    const enName = normalizePersonName(englishName);
+    setArabicName(arName);
+    setEnglishName(enName);
+
     if (!arName || !enName) {
       setError('أدخل الاسم العربي والاسم الإنجليزي.');
       return;
@@ -218,6 +241,7 @@ export default function PublicCardPage({ adminPreview = false }) {
       return;
     }
 
+    generationLockRef.current = true;
     setGenerating(true);
     setError('');
     setNotice('');
@@ -242,13 +266,15 @@ export default function PublicCardPage({ adminPreview = false }) {
       if (adminPreview) {
         setNotice('تم تجهيز بطاقة المعاينة. لم تُسجل العملية في الإحصائيات.');
       } else {
-        const { error: logError } = await supabase.from('generation_logs').insert({
+        const requestKey = createRequestKey();
+        const { error: logError } = await withTimeout(() => supabase.from('generation_logs').insert({
           occasion_id: occasion.id,
           template_id: selectedTemplate.id,
           arabic_name: arName,
           english_name: enName,
           shape: selectedShape,
-        });
+          request_key: requestKey,
+        }), 12_000, 'تم تجهيز البطاقة، لكن تأخر تسجيل العملية في الإحصائيات.');
 
         if (logError) {
           setNotice('تم تجهيز البطاقة، لكن تعذر تسجيل العملية في الإحصائيات.');
@@ -257,8 +283,9 @@ export default function PublicCardPage({ adminPreview = false }) {
         }
       }
     } catch (generationError) {
-      setError(generationError?.message || 'تعذر تجهيز البطاقة. حاول مرة أخرى.');
+      setError(getFriendlyClientError(generationError, 'تعذر تجهيز البطاقة. حاول مرة أخرى.'));
     } finally {
+      generationLockRef.current = false;
       setGenerating(false);
     }
   }
@@ -268,9 +295,15 @@ export default function PublicCardPage({ adminPreview = false }) {
     const link = document.createElement('a');
     link.href = generatedUrl;
     link.download = generatedFileName || 'greeting-card.jpg';
+    link.rel = 'noopener';
     document.body.appendChild(link);
     link.click();
     link.remove();
+
+    // بعض متصفحات iOS لا تدعم download بشكل كامل؛ فتح الملف يبقيه متاحًا للحفظ.
+    if (!('download' in HTMLAnchorElement.prototype)) {
+      window.open(generatedUrl, '_blank', 'noopener,noreferrer');
+    }
   }
 
   function resetForm() {
@@ -314,25 +347,29 @@ export default function PublicCardPage({ adminPreview = false }) {
             الاسم بالعربي
             <input
               value={arabicName}
-              onChange={(event) => { setArabicName(event.target.value); clearGeneratedCard(); }}
+              onChange={(event) => { setArabicName(event.target.value.replace(/[\r\n]+/g, ' ')); clearGeneratedCard(); }}
+              onBlur={() => setArabicName((value) => normalizePersonName(value))}
               placeholder="مثال: محمد أحمد"
               maxLength={100}
               autoComplete="name"
               dir="rtl"
             />
+            <small className="field-character-count">{arabicName.length}/100</small>
           </label>
 
           <label className="public-field">
             الاسم بالإنجليزي
             <input
               value={englishName}
-              onChange={(event) => { setEnglishName(event.target.value); clearGeneratedCard(); }}
+              onChange={(event) => { setEnglishName(event.target.value.replace(/[\r\n]+/g, ' ')); clearGeneratedCard(); }}
+              onBlur={() => setEnglishName((value) => normalizePersonName(value))}
               placeholder="Example: Mohammed Ahmed"
               maxLength={100}
               autoComplete="name"
               dir="ltr"
               lang="en"
             />
+            <small className="field-character-count">{englishName.length}/100</small>
           </label>
 
           <div className="builder-section-heading shape-step-heading">
@@ -393,7 +430,7 @@ export default function PublicCardPage({ adminPreview = false }) {
           {generatedUrl ? (
             <div className="generated-card-preview">
               <img src={generatedUrl} alt="البطاقة النهائية" />
-              <span><CheckCircle2 size={18} /> تم إنشاء JPG بالجودة الأصلية</span>
+              <span><CheckCircle2 size={18} /> تم إنشاء JPG بجودة عالية</span>
             </div>
           ) : selectedTemplate && selectedTextSettings ? (
             <div
@@ -402,41 +439,20 @@ export default function PublicCardPage({ adminPreview = false }) {
               style={{ aspectRatio: `${selectedTemplate.image_width} / ${selectedTemplate.image_height}` }}
             >
               <img src={getTemplatePublicUrl(selectedTemplate.image_path)} alt={selectedTemplate.name} />
-              <div
-                className="public-name-layer"
-                dir="rtl"
-                style={{
-                  left: `${selectedTextSettings.ar.x * 100}%`,
-                  top: `${selectedTextSettings.ar.y * 100}%`,
-                  width: `${selectedTextSettings.ar.maxWidth * 100}%`,
-                  color: selectedTextSettings.ar.color,
-                  fontFamily: `'${selectedTextSettings.ar.familyName}', Arial`,
-                  fontWeight: selectedTextSettings.ar.fontWeight,
-                  fontStyle: selectedTextSettings.ar.fontStyle,
-                  fontSize: `${Math.max(8, selectedTextSettings.ar.fontSize * previewScale)}px`,
-                  lineHeight: selectedTextSettings.ar.lineHeight,
-                  letterSpacing: `${selectedTextSettings.ar.letterSpacing * previewScale}px`,
-                  textAlign: selectedTextSettings.ar.align,
-                }}
-              >{arabicName.trim() || selectedTextSettings.ar.sampleText}</div>
-              <div
-                className="public-name-layer"
-                dir="ltr"
-                lang="en"
-                style={{
-                  left: `${selectedTextSettings.en.x * 100}%`,
-                  top: `${selectedTextSettings.en.y * 100}%`,
-                  width: `${selectedTextSettings.en.maxWidth * 100}%`,
-                  color: selectedTextSettings.en.color,
-                  fontFamily: `'${selectedTextSettings.en.familyName}', sans-serif`,
-                  fontWeight: selectedTextSettings.en.fontWeight,
-                  fontStyle: selectedTextSettings.en.fontStyle,
-                  fontSize: `${Math.max(8, selectedTextSettings.en.fontSize * previewScale)}px`,
-                  lineHeight: selectedTextSettings.en.lineHeight,
-                  letterSpacing: `${selectedTextSettings.en.letterSpacing * previewScale}px`,
-                  textAlign: selectedTextSettings.en.align,
-                }}
-              >{englishName.trim() || selectedTextSettings.en.sampleText}</div>
+              <CardNamePreview
+                value={arabicName}
+                settings={selectedTextSettings.ar}
+                language="ar"
+                templateWidth={selectedTemplate.image_width}
+                previewScale={previewScale}
+              />
+              <CardNamePreview
+                value={englishName}
+                settings={selectedTextSettings.en}
+                language="en"
+                templateWidth={selectedTemplate.image_width}
+                previewScale={previewScale}
+              />
             </div>
           ) : (
             <div className="no-public-template"><ImageIcon size={35} /><strong>لا يوجد قالب متاح</strong><span>فعّل قالبًا واحدًا على الأقل من صفحة القوالب.</span></div>
@@ -519,6 +535,11 @@ export default function PublicCardPage({ adminPreview = false }) {
             <h1>{missingRequestedOccasion ? 'هذه المناسبة غير متاحة حاليًا' : settings.empty_message_ar}</h1>
             <p lang="en" dir="ltr">{missingRequestedOccasion ? 'This occasion is not currently available.' : settings.empty_message_en}</p>
             <span>{error || (missingRequestedOccasion ? 'تحقق من الرابط أو ارجع إلى الصفحة الرئيسية.' : 'ستظهر هنا بطاقة المناسبة عند تفعيلها من لوحة الإدارة.')}</span>
+            {error && !missingRequestedOccasion && (
+              <button className="secondary-button empty-retry-button" type="button" onClick={() => setReloadToken((value) => value + 1)}>
+                <RefreshCw size={17} /> إعادة المحاولة
+              </button>
+            )}
             {missingRequestedOccasion && <Link className="primary-button empty-home-button" to="/">العودة إلى الصفحة الرئيسية</Link>}
           </section>
         )}

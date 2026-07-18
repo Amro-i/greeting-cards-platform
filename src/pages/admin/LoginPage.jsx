@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { LockKeyhole, Mail } from 'lucide-react';
 import { getBrandAssetUrl, useAppSettings } from '../../context/AppSettingsContext';
 import { useAuth } from '../../context/AuthContext';
+import { getFriendlyClientError } from '../../lib/reliability';
 
 export default function LoginPage() {
   const { user, signIn, isConfigured } = useAuth();
@@ -13,12 +14,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const logoUrl = getBrandAssetUrl(settings.logo_path);
 
   if (user) return <Navigate to="/admin" replace />;
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setError('');
     setSubmitting(true);
 
@@ -27,8 +31,12 @@ export default function LoginPage() {
       if (authError) throw authError;
       navigate(location.state?.from?.pathname || '/admin', { replace: true });
     } catch (err) {
-      setError(err.message || 'تعذر تسجيل الدخول.');
+      const message = String(err?.message || '').toLowerCase();
+      if (message.includes('invalid login credentials')) setError('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
+      else if (message.includes('email not confirmed')) setError('البريد الإلكتروني غير مؤكد في Supabase.');
+      else setError(getFriendlyClientError(err, 'تعذر تسجيل الدخول.'));
     } finally {
+      submitLockRef.current = false;
       setSubmitting(false);
     }
   }

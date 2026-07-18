@@ -1352,3 +1352,122 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   .brand-assets-grid, .brand-colors-grid { grid-template-columns: 1fr; }
   .public-cover-strip { height: 130px; }
 }
+
+/* Package 9: reliability, mobile polish and safer card generation */
+.network-status-banner {
+  position: sticky;
+  top: 0;
+  z-index: 10000;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  color: #7b3c13;
+  background: #fff3d9;
+  border-bottom: 1px solid #efd49b;
+  text-align: center;
+  font-weight: 600;
+}
+.fatal-error-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at top, var(--primary-soft), #f7f7fb 65%);
+}
+.fatal-error-page > section {
+  width: min(480px, 100%);
+  padding: 38px 28px;
+  border: 1px solid var(--border);
+  border-radius: 23px;
+  background: white;
+  box-shadow: 0 22px 65px rgba(48,42,94,.12);
+  text-align: center;
+}
+.fatal-error-icon {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 17px;
+  border-radius: 19px;
+  color: #a23c4d;
+  background: #fff0f2;
+}
+.fatal-error-page h1 { margin: 0; }
+.fatal-error-page p { margin: 8px 0 22px; color: var(--muted); }
+.field-character-count {
+  justify-self: end;
+  margin-top: -3px;
+  color: var(--muted);
+  font: 11px 'Aller', sans-serif;
+  direction: ltr;
+}
+.empty-retry-button { margin-top: 20px; }
+.public-name-layer {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: 2px;
+}
+.primary-button, .secondary-button, .danger-button, .download-card-button, .reset-card-button, .icon-button {
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .sidebar { padding: 14px 12px; }
+  .brand-box { padding: 2px 2px 13px; }
+  .side-nav {
+    display: flex;
+    gap: 7px;
+    margin-top: 12px;
+    padding-bottom: 5px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+  .side-nav a {
+    flex: 0 0 auto;
+    min-height: 43px;
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+  .signout-button { min-height: 43px; margin-top: 9px; }
+  .admin-topbar { height: auto; min-height: 68px; gap: 10px; padding-block: 11px; }
+  .role-pill { flex: 0 0 auto; }
+  .public-main.builder-main { padding: 25px 12px 38px; }
+  .builder-intro { padding-inline: 8px; }
+  .builder-intro > span:last-child { display: block; line-height: 1.65; }
+  .card-builder-form, .public-preview-panel { padding: 16px; }
+  .public-field input { font-size: 16px; }
+  .public-design-stage, .generated-card-preview > img { border-radius: 11px; }
+  .generated-actions { grid-template-columns: 1fr; }
+  .network-status-banner { font-size: 13px; }
+  .modal-backdrop { padding: 12px; }
+  .confirm-modal { width: 100%; }
+}
+
+@media (max-width: 420px) {
+  .public-header { align-items: center; gap: 10px; }
+  .public-brand { min-width: 0; }
+  .public-brand > div:last-child { min-width: 0; }
+  .public-brand strong, .public-brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .builder-section-heading { align-items: flex-start; }
+  .admin-content { padding-inline: 12px; }
+  .page-heading h1 { font-size: 26px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
