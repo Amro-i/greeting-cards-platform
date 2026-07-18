@@ -399,17 +399,13 @@ export default function PublicCardPage({ adminPreview = false }) {
         </div>
       )}
 
-      <div className="builder-intro">
-        <span className="eyebrow"><Sparkles size={16} /> {adminPreview ? 'معاينة المناسبة' : settings.welcome_title_ar}</span>
-        {!adminPreview && <p className="builder-welcome-en" lang="en" dir="ltr">{settings.welcome_title_en}</p>}
-        <h1>{occasion.title_ar}</h1>
-        <p lang="en" dir="ltr">{occasion.title_en}</p>
-        <BilingualText
-          className="builder-instruction"
-          ar="اكتب اسمك واختر شكل البطاقة، ثم حمّلها بصيغة JPG."
-          en="Enter your name, choose the card format, then download it as a JPG."
-        />
-      </div>
+      {adminPreview && (
+        <div className="builder-intro admin-only-builder-intro">
+          <span className="eyebrow"><Sparkles size={16} /> معاينة المناسبة</span>
+          <h1>{occasion.title_ar}</h1>
+          <p lang="en" dir="ltr">{occasion.title_en}</p>
+        </div>
+      )}
 
       <div className="builder-grid">
         <form ref={formRef} className="card-builder-form" onSubmit={handleGenerate}>
@@ -454,7 +450,6 @@ export default function PublicCardPage({ adminPreview = false }) {
             <span>2</span>
             <div>
               <BilingualText as="strong" ar="اختر نوع القالب" en="Choose Card Format" />
-              <BilingualText as="small" ar="تظهر فقط الأنواع التي جهزتها الإدارة." en="Only formats prepared by the administration are shown." />
             </div>
           </div>
 
@@ -561,12 +556,6 @@ export default function PublicCardPage({ adminPreview = false }) {
             )}
           </div>
 
-          <BilingualText
-            as="p"
-            className="preview-privacy-note"
-            ar="تُنشأ البطاقة داخل متصفحك، ولا يتم رفع ملف JPG إلى الخادم."
-            en="The card is created in your browser, and the JPG file is not uploaded to the server."
-          />
         </div>
       </div>
     </section>
