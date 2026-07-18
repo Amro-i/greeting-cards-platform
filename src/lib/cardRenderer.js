@@ -3,6 +3,7 @@ import { loadFont } from './fontUtils';
 const IMAGE_LOAD_TIMEOUT = 25_000;
 const MAX_CANVAS_PIXELS = 16_777_216;
 const MAX_CANVAS_SIDE = 8192;
+const JPG_OUTPUT_QUALITY = 1;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -141,7 +142,7 @@ function drawText(context, text, settings, language, canvasWidth, canvasHeight, 
   context.restore();
 }
 
-function canvasToJpegBlob(canvas, quality = 0.95) {
+function canvasToJpegBlob(canvas, quality = JPG_OUTPUT_QUALITY) {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error('استغرق إنشاء JPG وقتًا طويلًا.')), 20_000);
     canvas.toBlob((blob) => {
@@ -190,7 +191,7 @@ export async function renderGreetingCard({
   drawText(context, arabicName, arabicSettings, 'ar', safe.width, safe.height, safe.scale);
   drawText(context, englishName, englishSettings, 'en', safe.width, safe.height, safe.scale);
 
-  return canvasToJpegBlob(canvas, 0.95);
+  return canvasToJpegBlob(canvas, JPG_OUTPUT_QUALITY);
 }
 
 export function makeCardFileName(occasion, englishName, shape) {
