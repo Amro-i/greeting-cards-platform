@@ -96,6 +96,8 @@ export default function PublicCardPage({ adminPreview = false }) {
   const [selectedShape, setSelectedShape] = useState('');
   const [arabicName, setArabicName] = useState('');
   const [englishName, setEnglishName] = useState('');
+  const [arabicNameError, setArabicNameError] = useState('');
+  const [englishNameError, setEnglishNameError] = useState('');
   const [previewWidth, setPreviewWidth] = useState(1);
   const [formHeight, setFormHeight] = useState(0);
   const [previewAreaSize, setPreviewAreaSize] = useState({ width: 0, height: 0 });
@@ -305,12 +307,37 @@ export default function PublicCardPage({ adminPreview = false }) {
     clearGeneratedCard();
   }
 
+  function handleArabicNameChange(event) {
+    const rawValue = event.target.value;
+    const cleanValue = sanitizeArabicName(rawValue);
+    const hasInvalidCharacters = rawValue !== cleanValue;
+
+    setArabicName(cleanValue);
+    setArabicNameError(hasInvalidCharacters ? 'اكتب الاسم باللغة العربية فقط.' : '');
+    clearGeneratedCard();
+  }
+
+  function handleEnglishNameChange(event) {
+    const rawValue = event.target.value;
+    const cleanValue = sanitizeEnglishName(rawValue);
+    const hasInvalidCharacters = rawValue !== cleanValue;
+
+    setEnglishName(cleanValue);
+    setEnglishNameError(hasInvalidCharacters ? 'اكتب الاسم باللغة الإنجليزية فقط.' : '');
+    clearGeneratedCard();
+  }
+
   async function handleGenerate(event) {
     event.preventDefault();
     if (!selectedTemplate || !selectedTextSettings || generationLockRef.current) return;
 
     const arName = normalizePersonName(sanitizeArabicName(arabicName));
     const enName = normalizePersonName(sanitizeEnglishName(englishName));
+
+    if (arabicNameError || englishNameError) {
+      setError('صحح لغة الاسم في الحقول أولًا.');
+      return;
+    }
     setArabicName(arName);
     setEnglishName(enName);
 
@@ -480,30 +507,46 @@ export default function PublicCardPage({ adminPreview = false }) {
           <label className="public-field">
             <BilingualText className="field-bilingual-label" ar="الاسم بالعربي" en="Arabic Name" />
             <input
+              className={arabicNameError ? 'has-language-error' : ''}
               value={arabicName}
-              onChange={(event) => { setArabicName(sanitizeArabicName(event.target.value)); clearGeneratedCard(); }}
+              onChange={handleArabicNameChange}
               onBlur={() => setArabicName((value) => normalizePersonName(sanitizeArabicName(value)))}
               placeholder="مثال: محمد أحمد"
               maxLength={100}
               autoComplete="name"
               dir="rtl"
+              aria-invalid={Boolean(arabicNameError)}
+              aria-describedby={arabicNameError ? 'arabic-name-language-error' : undefined}
             />
-            <small className="field-character-count">{arabicName.length}/100</small>
+            <div className="field-meta-row">
+              {arabicNameError ? (
+                <small id="arabic-name-language-error" className="field-language-error" role="alert">{arabicNameError}</small>
+              ) : <span />}
+              <small className="field-character-count">{arabicName.length}/100</small>
+            </div>
           </label>
 
           <label className="public-field">
             <BilingualText className="field-bilingual-label" ar="الاسم بالإنجليزي" en="English Name" />
             <input
+              className={englishNameError ? 'has-language-error' : ''}
               value={englishName}
-              onChange={(event) => { setEnglishName(sanitizeEnglishName(event.target.value)); clearGeneratedCard(); }}
+              onChange={handleEnglishNameChange}
               onBlur={() => setEnglishName((value) => normalizePersonName(sanitizeEnglishName(value)))}
               placeholder="Example: Mohammed Ahmed"
               maxLength={100}
               autoComplete="name"
               dir="rtl"
               lang="en"
+              aria-invalid={Boolean(englishNameError)}
+              aria-describedby={englishNameError ? 'english-name-language-error' : undefined}
             />
-            <small className="field-character-count">{englishName.length}/100</small>
+            <div className="field-meta-row">
+              {englishNameError ? (
+                <small id="english-name-language-error" className="field-language-error" role="alert">{englishNameError}</small>
+              ) : <span />}
+              <small className="field-character-count">{englishName.length}/100</small>
+            </div>
           </label>
 
           <div className="builder-section-heading shape-step-heading">

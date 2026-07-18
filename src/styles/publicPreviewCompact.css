@@ -283,3 +283,38 @@
   .public-brand-title strong { font-size: 17px; }
   .public-brand-title span { font-size: 11px; }
 }
+
+
+/* Public name fields: fixed small examples and language validation */
+.public-page .public-field input::placeholder {
+  font-size: 13px !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+}
+
+.public-page .public-field input.has-language-error {
+  border-color: #d94b63;
+  box-shadow: 0 0 0 3px rgba(217, 75, 99, .09);
+}
+
+.public-page .field-meta-row {
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.public-page .field-language-error {
+  color: #b52f46;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.public-page .field-meta-row .field-character-count {
+  margin-inline-start: auto;
+  white-space: nowrap;
+}
