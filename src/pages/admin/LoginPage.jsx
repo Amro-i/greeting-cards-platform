@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { LockKeyhole, Mail } from 'lucide-react';
+import { getBrandAssetUrl, useAppSettings } from '../../context/AppSettingsContext';
 import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const { user, signIn, isConfigured } = useAuth();
+  const { settings } = useAppSettings();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const logoUrl = getBrandAssetUrl(settings.logo_path);
 
   if (user) return <Navigate to="/admin" replace />;
 
@@ -33,30 +36,18 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <section className="login-panel">
-        <div className="brand-mark large">ب</div>
+        {logoUrl ? <div className="brand-logo large"><img src={logoUrl} alt={settings.platform_name_ar} /></div> : <div className="brand-mark large">ب</div>}
         <h1>دخول الإدارة</h1>
-        <p lang="en" dir="ltr">Admin Login</p>
+        <p><span>{settings.platform_name_ar}</span><small lang="en" dir="ltr">{settings.platform_name_en}</small></p>
 
-        {!isConfigured && (
-          <div className="setup-alert">
-            أضف بيانات Supabase داخل ملف <code>.env</code> أولًا.
-          </div>
-        )}
+        {!isConfigured && <div className="setup-alert">أضف بيانات Supabase داخل ملف <code>.env</code> أولًا.</div>}
 
         <form onSubmit={handleSubmit}>
           <label>
             البريد الإلكتروني
             <span className="input-with-icon">
               <Mail size={18} />
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@example.com"
-                dir="ltr"
-                required
-                disabled={!isConfigured}
-              />
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="admin@example.com" dir="ltr" required disabled={!isConfigured} />
             </span>
           </label>
 
@@ -64,15 +55,7 @@ export default function LoginPage() {
             كلمة المرور
             <span className="input-with-icon">
               <LockKeyhole size={18} />
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
-                dir="ltr"
-                required
-                disabled={!isConfigured}
-              />
+              <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" dir="ltr" required disabled={!isConfigured} />
             </span>
           </label>
 

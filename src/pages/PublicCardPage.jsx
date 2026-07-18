@@ -15,17 +15,12 @@ import {
   Square,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { getBrandAssetUrl, useAppSettings } from '../context/AppSettingsContext';
 import { makeCardFileName, renderGreetingCard } from '../lib/cardRenderer';
 import { findDefaultFont, loadFonts, normalizeTextSettings } from '../lib/fontUtils';
 import { getFriendlySupabaseError, getTemplatePublicUrl } from '../lib/occasionUtils';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
-const DEFAULT_SETTINGS = {
-  platform_name_ar: 'بطاقات تهنئة',
-  platform_name_en: 'Greeting Cards',
-  empty_message_ar: 'لا توجد مناسبة متاحة حاليًا',
-  empty_message_en: 'No occasion is currently available.',
-};
 
 const OCCASION_SELECT = `
   id, title_ar, title_en, slug, starts_at, ends_at, status,
@@ -64,11 +59,11 @@ function getOccasionThumbnail(occasion) {
 export default function PublicCardPage({ adminPreview = false }) {
   const { slug, occasionId } = useParams();
   const previewRef = useRef(null);
+  const { settings, loading: settingsLoading } = useAppSettings();
   const [loading, setLoading] = useState(isSupabaseConfigured);
   const [occasion, setOccasion] = useState(null);
   const [activeOccasions, setActiveOccasions] = useState([]);
   const [fonts, setFonts] = useState([]);
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [selectedShape, setSelectedShape] = useState('');
   const [arabicName, setArabicName] = useState('');
   const [englishName, setEnglishName] = useState('');
@@ -120,13 +115,8 @@ export default function PublicCardPage({ adminPreview = false }) {
           .order('starts_at', { ascending: false });
       }
 
-      const [occasionResult, settingsResult, fontsResult] = await Promise.all([
+      const [occasionResult, fontsResult] = await Promise.all([
         occasionQuery,
-        supabase
-          .from('app_settings')
-          .select('platform_name_ar, platform_name_en, empty_message_ar, empty_message_en')
-          .eq('id', true)
-          .maybeSingle(),
         supabase
           .from('fonts')
           .select('id, display_name, family_name, language, weight, style, storage_path, is_system, is_active')
@@ -139,7 +129,6 @@ export default function PublicCardPage({ adminPreview = false }) {
       if (occasionResult.error || fontsResult.error) {
         setError(getFriendlySupabaseError(occasionResult.error || fontsResult.error));
       }
-      if (settingsResult.data) setSettings(settingsResult.data);
       setFonts(fontsResult.data || []);
       void loadFonts(fontsResult.data || []);
 
@@ -291,7 +280,7 @@ export default function PublicCardPage({ adminPreview = false }) {
     clearGeneratedCard();
   }
 
-  if (loading) {
+  if (loading || settingsLoading) {
     return <div className="screen-center"><LoaderCircle className="spin" size={25} /> جاري تحميل المناسبة...</div>;
   }
 
@@ -307,7 +296,8 @@ export default function PublicCardPage({ adminPreview = false }) {
       )}
 
       <div className="builder-intro">
-        <span className="eyebrow"><Sparkles size={16} /> {adminPreview ? 'معاينة المناسبة' : 'المناسبة الحالية'}</span>
+        <span className="eyebrow"><Sparkles size={16} /> {adminPreview ? 'معاينة المناسبة' : settings.welcome_title_ar}</span>
+        {!adminPreview && <p className="builder-welcome-en" lang="en" dir="ltr">{settings.welcome_title_en}</p>}
         <h1>{occasion.title_ar}</h1>
         <p lang="en" dir="ltr">{occasion.title_en}</p>
         <span>اكتب اسمك واختر شكل البطاقة، ثم حمّلها بصيغة JPG.</span>
@@ -380,13 +370,13 @@ export default function PublicCardPage({ adminPreview = false }) {
           <button className="primary-button public-generate-button" type="submit" disabled={!canGenerate}>
             {generating
               ? <><LoaderCircle className="spin" size={19} /> جاري تجهيز البطاقة...</>
-              : <><Sparkles size={19} /> تجهيز البطاقة</>}
+              : <><Sparkles size={19} /> {settings.generate_button_ar}</>}
           </button>
 
           {generatedUrl && (
             <div className="generated-actions">
               <button className="download-card-button" type="button" onClick={downloadCard}>
-                <Download size={19} /> تحميل البطاقة JPG
+                <Download size={19} /> {settings.download_button_ar}
               </button>
               <button className="reset-card-button" type="button" onClick={resetForm}>
                 <RotateCcw size={17} /> البدء من جديد
@@ -477,7 +467,9 @@ export default function PublicCardPage({ adminPreview = false }) {
     <div className="public-page">
       <header className="public-header">
         <Link to="/" className="public-brand">
-          <div className="brand-mark">ب</div>
+          {settings.logo_path ? (
+            <div className="brand-logo"><img src={getBrandAssetUrl(settings.logo_path)} alt={settings.platform_name_ar} /></div>
+          ) : <div className="brand-mark">ب</div>}
           <div>
             <strong>{settings.platform_name_ar}</strong>
             <span>{settings.platform_name_en}</span>
@@ -488,6 +480,12 @@ export default function PublicCardPage({ adminPreview = false }) {
           دخول الإدارة
         </a>
       </header>
+
+      {settings.cover_path && (
+        <div className="public-cover-strip">
+          <img src={getBrandAssetUrl(settings.cover_path)} alt="غلاف المنصة" />
+        </div>
+      )}
 
       <main className={`public-main ${occasion ? 'builder-main' : ''} ${isPicker ? 'occasion-picker-main' : ''}`}>
         {isPicker ? (
@@ -526,7 +524,7 @@ export default function PublicCardPage({ adminPreview = false }) {
         )}
       </main>
 
-      <footer className="public-footer">بطاقتك تُنشأ مباشرة وبخصوصية.</footer>
+      <footer className="public-footer"><span>{settings.footer_text_ar}</span><small lang="en" dir="ltr">{settings.footer_text_en}</small></footer>
     </div>
   );
 }
