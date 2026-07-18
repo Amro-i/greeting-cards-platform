@@ -111,3 +111,20 @@
 .builder-section-heading > span {
   border-radius: 0 !important;
 }
+
+/* Mobile public header: align the visible horizontal logo with the left edge of the public cards. */
+@media (max-width: 560px) {
+  .public-page .public-header.public-header--brand {
+    padding-inline: 12px !important;
+  }
+
+  .public-page .public-header-logo {
+    justify-items: start;
+    overflow: visible;
+  }
+
+  .public-page .public-header-logo img {
+    transform: translateX(-15%);
+    transform-origin: left center;
+  }
+}
