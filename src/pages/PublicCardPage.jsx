@@ -472,7 +472,7 @@ export default function PublicCardPage({ adminPreview = false }) {
   }
 
   if (loading || settingsLoading) {
-    return <div className="screen-center"><LoaderCircle className="spin" size={25} /><BilingualText ar="جاري تحميل المناسبة..." en="Loading occasion..." /></div>;
+    return <div className="screen-center public-initial-loader" aria-label="Loading"><LoaderCircle className="spin" size={34} /></div>;
   }
 
   const isPicker = !adminPreview && !slug && activeOccasions.length > 1 && !occasion;
