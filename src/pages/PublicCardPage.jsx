@@ -35,6 +35,18 @@ const OCCASION_SELECT = `
   )
 `;
 
+function sanitizeArabicName(value) {
+  return String(value || '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[^\u0621-\u063A\u0640-\u065F\u066E-\u066F\u0670-\u06D3\u06D5-\u06ED\u06FA-\u06FF\s]/g, '');
+}
+
+function sanitizeEnglishName(value) {
+  return String(value || '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[^A-Za-z\s'-]/g, '');
+}
+
 function getTemplateSettings(template, fonts) {
   const row = Array.isArray(template?.template_settings)
     ? template.template_settings[0]
@@ -297,8 +309,8 @@ export default function PublicCardPage({ adminPreview = false }) {
     event.preventDefault();
     if (!selectedTemplate || !selectedTextSettings || generationLockRef.current) return;
 
-    const arName = normalizePersonName(arabicName);
-    const enName = normalizePersonName(englishName);
+    const arName = normalizePersonName(sanitizeArabicName(arabicName));
+    const enName = normalizePersonName(sanitizeEnglishName(englishName));
     setArabicName(arName);
     setEnglishName(enName);
 
@@ -469,8 +481,8 @@ export default function PublicCardPage({ adminPreview = false }) {
             <BilingualText className="field-bilingual-label" ar="الاسم بالعربي" en="Arabic Name" />
             <input
               value={arabicName}
-              onChange={(event) => { setArabicName(event.target.value.replace(/[\r\n]+/g, ' ')); clearGeneratedCard(); }}
-              onBlur={() => setArabicName((value) => normalizePersonName(value))}
+              onChange={(event) => { setArabicName(sanitizeArabicName(event.target.value)); clearGeneratedCard(); }}
+              onBlur={() => setArabicName((value) => normalizePersonName(sanitizeArabicName(value)))}
               placeholder="مثال: محمد أحمد"
               maxLength={100}
               autoComplete="name"
@@ -483,8 +495,8 @@ export default function PublicCardPage({ adminPreview = false }) {
             <BilingualText className="field-bilingual-label" ar="الاسم بالإنجليزي" en="English Name" />
             <input
               value={englishName}
-              onChange={(event) => { setEnglishName(event.target.value.replace(/[\r\n]+/g, ' ')); clearGeneratedCard(); }}
-              onBlur={() => setEnglishName((value) => normalizePersonName(value))}
+              onChange={(event) => { setEnglishName(sanitizeEnglishName(event.target.value)); clearGeneratedCard(); }}
+              onBlur={() => setEnglishName((value) => normalizePersonName(sanitizeEnglishName(value)))}
               placeholder="Example: Mohammed Ahmed"
               maxLength={100}
               autoComplete="name"
@@ -574,7 +586,6 @@ export default function PublicCardPage({ adminPreview = false }) {
                 <div className="public-design-stage-wrap is-generated">
                   <img src={generatedUrl} alt="البطاقة النهائية" className="generated-card-image" style={previewViewportStyle} />
                 </div>
-                <span><CheckCircle2 size={18} /><BilingualText ar="تم إنشاء JPG بجودة عالية" en="High-quality JPG created" /></span>
               </div>
             ) : selectedTemplate && selectedTextSettings ? (
               <div className="public-design-stage-wrap">
