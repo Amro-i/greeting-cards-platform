@@ -8,7 +8,6 @@ import {
   Eye,
   ImageIcon,
   LoaderCircle,
-  RectangleHorizontal,
   RectangleVertical,
   RefreshCw,
   RotateCcw,
@@ -61,9 +60,21 @@ function getOccasionThumbnail(occasion) {
   return templates[0] || null;
 }
 
+function BilingualText({ ar, en, className = '', as = 'span' }) {
+  const Tag = as;
+  return (
+    <Tag className={`bilingual-text ${className}`.trim()}>
+      <span>{ar}</span>
+      <span className="bilingual-en" lang="en" dir="ltr">{en}</span>
+    </Tag>
+  );
+}
+
 export default function PublicCardPage({ adminPreview = false }) {
   const { slug, occasionId } = useParams();
   const previewRef = useRef(null);
+  const formRef = useRef(null);
+  const previewAreaRef = useRef(null);
   const generationLockRef = useRef(false);
   const { settings, loading: settingsLoading } = useAppSettings();
   const [loading, setLoading] = useState(isSupabaseConfigured);
@@ -74,6 +85,8 @@ export default function PublicCardPage({ adminPreview = false }) {
   const [arabicName, setArabicName] = useState('');
   const [englishName, setEnglishName] = useState('');
   const [previewWidth, setPreviewWidth] = useState(1);
+  const [formHeight, setFormHeight] = useState(0);
+  const [previewAreaSize, setPreviewAreaSize] = useState({ width: 0, height: 0 });
   const [generatedUrl, setGeneratedUrl] = useState('');
   const [generatedFileName, setGeneratedFileName] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -176,7 +189,29 @@ export default function PublicCardPage({ adminPreview = false }) {
     });
     observer.observe(previewRef.current);
     return () => observer.disconnect();
-  }, [occasion, selectedShape]);
+  }, [occasion, selectedShape, generatedUrl]);
+
+  useEffect(() => {
+    if (!formRef.current) return undefined;
+    const observer = new ResizeObserver((entries) => {
+      setFormHeight(Math.ceil(entries[0]?.borderBoxSize?.[0]?.blockSize || entries[0]?.contentRect?.height || 0));
+    });
+    observer.observe(formRef.current);
+    return () => observer.disconnect();
+  }, [occasion]);
+
+  useEffect(() => {
+    if (!previewAreaRef.current) return undefined;
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0]?.contentRect;
+      setPreviewAreaSize({
+        width: Math.max(0, rect?.width || 0),
+        height: Math.max(0, rect?.height || 0),
+      });
+    });
+    observer.observe(previewAreaRef.current);
+    return () => observer.disconnect();
+  }, [occasion, generatedUrl]);
 
   useEffect(() => () => {
     if (generatedUrl) URL.revokeObjectURL(generatedUrl);
@@ -209,15 +244,35 @@ export default function PublicCardPage({ adminPreview = false }) {
     && englishName.trim()
     && !generating,
   );
-  const previewIsPortrait = selectedTemplate ? selectedTemplate.image_height > selectedTemplate.image_width : false;
-  const previewMaxWidth = selectedShape === 'rectangle' ? 300 : 430;
-  const previewViewportStyle = selectedTemplate
-    ? {
+  const previewPanelStyle = formHeight > 0 ? { height: `${formHeight}px` } : undefined;
+  const previewViewportStyle = useMemo(() => {
+    if (!selectedTemplate) return undefined;
+
+    const ratio = selectedTemplate.image_width / selectedTemplate.image_height;
+    const availableWidth = Math.max(0, previewAreaSize.width - 12);
+    const availableHeight = Math.max(0, previewAreaSize.height - 12);
+
+    if (!availableWidth || !availableHeight) {
+      return {
         aspectRatio: String(selectedTemplate.image_width) + ' / ' + String(selectedTemplate.image_height),
-        width: '100%',
-        maxWidth: String(previewMaxWidth) + 'px',
-      }
-    : undefined;
+        width: 'min(100%, 420px)',
+      };
+    }
+
+    let fittedWidth = Math.min(availableWidth, availableHeight * ratio);
+    let fittedHeight = fittedWidth / ratio;
+
+    if (fittedHeight > availableHeight) {
+      fittedHeight = availableHeight;
+      fittedWidth = fittedHeight * ratio;
+    }
+
+    return {
+      width: `${Math.max(1, fittedWidth)}px`,
+      height: `${Math.max(1, fittedHeight)}px`,
+      aspectRatio: String(selectedTemplate.image_width) + ' / ' + String(selectedTemplate.image_height),
+    };
+  }, [previewAreaSize.height, previewAreaSize.width, selectedTemplate]);
 
   function clearGeneratedCard() {
     setGeneratedUrl((current) => {
@@ -330,7 +385,7 @@ export default function PublicCardPage({ adminPreview = false }) {
   }
 
   if (loading || settingsLoading) {
-    return <div className="screen-center"><LoaderCircle className="spin" size={25} /> جاري تحميل المناسبة...</div>;
+    return <div className="screen-center"><LoaderCircle className="spin" size={25} /><BilingualText ar="جاري تحميل المناسبة..." en="Loading occasion..." /></div>;
   }
 
   const isPicker = !adminPreview && !slug && activeOccasions.length > 1 && !occasion;
@@ -349,18 +404,25 @@ export default function PublicCardPage({ adminPreview = false }) {
         {!adminPreview && <p className="builder-welcome-en" lang="en" dir="ltr">{settings.welcome_title_en}</p>}
         <h1>{occasion.title_ar}</h1>
         <p lang="en" dir="ltr">{occasion.title_en}</p>
-        <span>اكتب اسمك واختر شكل البطاقة، ثم حمّلها بصيغة JPG.</span>
+        <BilingualText
+          className="builder-instruction"
+          ar="اكتب اسمك واختر شكل البطاقة، ثم حمّلها بصيغة JPG."
+          en="Enter your name, choose the card format, then download it as a JPG."
+        />
       </div>
 
       <div className="builder-grid">
-        <form className="card-builder-form" onSubmit={handleGenerate}>
+        <form ref={formRef} className="card-builder-form" onSubmit={handleGenerate}>
           <div className="builder-section-heading">
             <span>1</span>
-            <div><strong>أدخل الأسماء</strong><small>سيظهر كل اسم في مكانه المحدد داخل القالب.</small></div>
+            <div>
+              <BilingualText as="strong" ar="أدخل الأسماء" en="Enter Names" />
+              <BilingualText as="small" ar="سيظهر كل اسم في مكانه المحدد داخل القالب." en="Each name will appear in its assigned position on the card." />
+            </div>
           </div>
 
           <label className="public-field">
-            الاسم بالعربي
+            <BilingualText className="field-bilingual-label" ar="الاسم بالعربي" en="Arabic Name" />
             <input
               value={arabicName}
               onChange={(event) => { setArabicName(event.target.value.replace(/[\r\n]+/g, ' ')); clearGeneratedCard(); }}
@@ -374,7 +436,7 @@ export default function PublicCardPage({ adminPreview = false }) {
           </label>
 
           <label className="public-field">
-            الاسم بالإنجليزي
+            <BilingualText className="field-bilingual-label" ar="الاسم بالإنجليزي" en="English Name" />
             <input
               value={englishName}
               onChange={(event) => { setEnglishName(event.target.value.replace(/[\r\n]+/g, ' ')); clearGeneratedCard(); }}
@@ -390,7 +452,10 @@ export default function PublicCardPage({ adminPreview = false }) {
 
           <div className="builder-section-heading shape-step-heading">
             <span>2</span>
-            <div><strong>اختر نوع القالب</strong><small>تظهر فقط الأنواع التي جهزتها الإدارة.</small></div>
+            <div>
+              <BilingualText as="strong" ar="اختر نوع القالب" en="Choose Card Format" />
+              <BilingualText as="small" ar="تظهر فقط الأنواع التي جهزتها الإدارة." en="Only formats prepared by the administration are shown." />
+            </div>
           </div>
 
           <div className="public-shape-buttons">
@@ -400,8 +465,11 @@ export default function PublicCardPage({ adminPreview = false }) {
               onClick={() => changeShape('square')}
               disabled={!templatesByShape.square}
             >
-              <Square size={25} />
-              <span><strong>مربع</strong><small>{templatesByShape.square ? 'متاح' : 'غير متاح'}</small></span>
+              <Square size={24} />
+              <span>
+                <BilingualText as="strong" ar="مربع" en="Square" />
+                <BilingualText as="small" ar={templatesByShape.square ? 'متاح' : 'غير متاح'} en={templatesByShape.square ? 'Available' : 'Unavailable'} />
+              </span>
               {selectedShape === 'square' && <CheckCircle2 size={18} />}
             </button>
 
@@ -412,7 +480,10 @@ export default function PublicCardPage({ adminPreview = false }) {
               disabled={!templatesByShape.rectangle}
             >
               <RectangleVertical size={22} />
-              <span><strong>مستطيل</strong><small>{templatesByShape.rectangle ? 'متاح' : 'غير متاح'}</small></span>
+              <span>
+                <BilingualText as="strong" ar="طولي" en="Portrait" />
+                <BilingualText as="small" ar={templatesByShape.rectangle ? 'متاح' : 'غير متاح'} en={templatesByShape.rectangle ? 'Available' : 'Unavailable'} />
+              </span>
               {selectedShape === 'rectangle' && <CheckCircle2 size={18} />}
             </button>
           </div>
@@ -422,64 +493,80 @@ export default function PublicCardPage({ adminPreview = false }) {
 
           <button className="primary-button public-generate-button" type="submit" disabled={!canGenerate}>
             {generating
-              ? <><LoaderCircle className="spin" size={19} /> جاري تجهيز البطاقة...</>
-              : <><Sparkles size={19} /> {settings.generate_button_ar}</>}
+              ? <><LoaderCircle className="spin" size={19} /><BilingualText ar="جاري تجهيز البطاقة..." en="Creating card..." /></>
+              : <><Sparkles size={19} /><BilingualText ar={settings.generate_button_ar} en="Create Card" /></>}
           </button>
 
           {generatedUrl && (
             <div className="generated-actions">
               <button className="download-card-button" type="button" onClick={downloadCard}>
-                <Download size={19} /> {settings.download_button_ar}
+                <Download size={19} /><BilingualText ar={settings.download_button_ar} en="Download JPG" />
               </button>
               <button className="reset-card-button" type="button" onClick={resetForm}>
-                <RotateCcw size={17} /> البدء من جديد
+                <RotateCcw size={17} /><BilingualText ar="البدء من جديد" en="Start Over" />
               </button>
             </div>
           )}
         </form>
 
-        <div className="public-preview-panel">
+        <div className="public-preview-panel" style={previewPanelStyle}>
           <div className="public-preview-heading">
-            <div><ImageIcon size={20} /><span><strong>{generatedUrl ? 'البطاقة النهائية' : 'معاينة البطاقة'}</strong><small>{selectedTemplate ? `${selectedTemplate.image_width} × ${selectedTemplate.image_height} px` : 'اختر قالبًا متاحًا'}</small></span></div>
+            <div>
+              <ImageIcon size={20} />
+              <span>
+                <BilingualText as="strong" ar={generatedUrl ? 'البطاقة النهائية' : 'معاينة البطاقة'} en={generatedUrl ? 'Final Card' : 'Card Preview'} />
+                <small>{selectedTemplate ? `${selectedTemplate.image_width} × ${selectedTemplate.image_height} px` : 'اختر قالبًا متاحًا / Choose an available format'}</small>
+              </span>
+            </div>
           </div>
 
-          
-{generatedUrl ? (
-            <div className="generated-card-preview">
-              <div className="public-design-stage-wrap is-generated" style={{ maxWidth: `${previewMaxWidth}px` }}>
-                <img src={generatedUrl} alt="البطاقة النهائية" className="generated-card-image" />
+          <div ref={previewAreaRef} className="public-preview-area">
+            {generatedUrl ? (
+              <div className="generated-card-preview">
+                <div className="public-design-stage-wrap is-generated">
+                  <img src={generatedUrl} alt="البطاقة النهائية" className="generated-card-image" style={previewViewportStyle} />
+                </div>
+                <span><CheckCircle2 size={18} /><BilingualText ar="تم إنشاء JPG بجودة عالية" en="High-quality JPG created" /></span>
               </div>
-              <span><CheckCircle2 size={18} /> تم إنشاء JPG بجودة عالية</span>
-            </div>
-          ) : selectedTemplate && selectedTextSettings ? (
-            <div className="public-design-stage-wrap">
-              <div
-                ref={previewRef}
-                className="public-design-stage"
-                style={previewViewportStyle}
-              >
-                <img src={getTemplatePublicUrl(selectedTemplate.image_path)} alt={selectedTemplate.name} />
-                <CardNamePreview
-                  value={arabicName}
-                  settings={selectedTextSettings.ar}
-                  language="ar"
-                  templateWidth={selectedTemplate.image_width}
-                  previewScale={previewScale}
-                />
-                <CardNamePreview
-                  value={englishName}
-                  settings={selectedTextSettings.en}
-                  language="en"
-                  templateWidth={selectedTemplate.image_width}
-                  previewScale={previewScale}
-                />
+            ) : selectedTemplate && selectedTextSettings ? (
+              <div className="public-design-stage-wrap">
+                <div
+                  ref={previewRef}
+                  className="public-design-stage"
+                  style={previewViewportStyle}
+                >
+                  <img src={getTemplatePublicUrl(selectedTemplate.image_path)} alt={selectedTemplate.name} />
+                  <CardNamePreview
+                    value={arabicName}
+                    settings={selectedTextSettings.ar}
+                    language="ar"
+                    templateWidth={selectedTemplate.image_width}
+                    previewScale={previewScale}
+                  />
+                  <CardNamePreview
+                    value={englishName}
+                    settings={selectedTextSettings.en}
+                    language="en"
+                    templateWidth={selectedTemplate.image_width}
+                    previewScale={previewScale}
+                  />
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="no-public-template"><ImageIcon size={35} /><strong>لا يوجد قالب متاح</strong><span>فعّل قالبًا واحدًا على الأقل من صفحة القوالب.</span></div>
-          )}
+            ) : (
+              <div className="no-public-template">
+                <ImageIcon size={35} />
+                <BilingualText as="strong" ar="لا يوجد قالب متاح" en="No card format available" />
+                <BilingualText as="span" ar="فعّل قالبًا واحدًا على الأقل من صفحة القوالب." en="Activate at least one card format from the templates page." />
+              </div>
+            )}
+          </div>
 
-          <p className="preview-privacy-note">تُنشأ البطاقة داخل متصفحك، ولا يتم رفع ملف JPG إلى الخادم.</p>
+          <BilingualText
+            as="p"
+            className="preview-privacy-note"
+            ar="تُنشأ البطاقة داخل متصفحك، ولا يتم رفع ملف JPG إلى الخادم."
+            en="The card is created in your browser, and the JPG file is not uploaded to the server."
+          />
         </div>
       </div>
     </section>
@@ -514,7 +601,7 @@ export default function PublicCardPage({ adminPreview = false }) {
         </Link>
         <a href="/admin/login" className="admin-link">
           <ShieldCheck size={18} />
-          دخول الإدارة
+          <BilingualText ar="دخول الإدارة" en="Admin Login" />
         </a>
       </header>
 
@@ -528,9 +615,9 @@ export default function PublicCardPage({ adminPreview = false }) {
         {isPicker ? (
           <section className="public-occasion-picker">
             <div className="picker-heading">
-              <span className="eyebrow"><CalendarDays size={17} /> المناسبات المتاحة</span>
-              <h1>اختر المناسبة</h1>
-              <p>توجد أكثر من مناسبة مفعلة حاليًا. اختر المناسبة التي تريد تجهيز بطاقتها.</p>
+              <span className="eyebrow"><CalendarDays size={17} /><BilingualText ar="المناسبات المتاحة" en="Available Occasions" /></span>
+              <BilingualText as="h1" ar="اختر المناسبة" en="Choose an Occasion" />
+              <BilingualText as="p" ar="توجد أكثر من مناسبة مفعلة حاليًا. اختر المناسبة التي تريد تجهيز بطاقتها." en="More than one occasion is currently active. Choose the occasion for your card." />
             </div>
             <div className="occasion-choice-grid">
               {activeOccasions.map((item) => {
@@ -543,7 +630,7 @@ export default function PublicCardPage({ adminPreview = false }) {
                     <div className="choice-body">
                       <h2>{item.title_ar}</h2>
                       <p lang="en" dir="ltr">{item.title_en}</p>
-                      <span>فتح المناسبة <ArrowRight size={16} /></span>
+                      <span><BilingualText ar="فتح المناسبة" en="Open Occasion" /><ArrowRight size={16} /></span>
                     </div>
                   </Link>
                 );
@@ -555,13 +642,21 @@ export default function PublicCardPage({ adminPreview = false }) {
             <div className="empty-icon"><CalendarX2 size={40} /></div>
             <h1>{missingRequestedOccasion ? 'هذه المناسبة غير متاحة حاليًا' : settings.empty_message_ar}</h1>
             <p lang="en" dir="ltr">{missingRequestedOccasion ? 'This occasion is not currently available.' : settings.empty_message_en}</p>
-            <span>{error || (missingRequestedOccasion ? 'تحقق من الرابط أو ارجع إلى الصفحة الرئيسية.' : 'ستظهر هنا بطاقة المناسبة عند تفعيلها من لوحة الإدارة.')}</span>
+            {error ? (
+              <BilingualText as="span" ar={error} en="Please try again or contact the administrator." />
+            ) : (
+              <BilingualText
+                as="span"
+                ar={missingRequestedOccasion ? 'تحقق من الرابط أو ارجع إلى الصفحة الرئيسية.' : 'ستظهر هنا بطاقة المناسبة عند تفعيلها من لوحة الإدارة.'}
+                en={missingRequestedOccasion ? 'Check the link or return to the home page.' : 'The occasion card will appear here when it is activated by the administration.'}
+              />
+            )}
             {error && !missingRequestedOccasion && (
               <button className="secondary-button empty-retry-button" type="button" onClick={() => setReloadToken((value) => value + 1)}>
-                <RefreshCw size={17} /> إعادة المحاولة
+                <RefreshCw size={17} /><BilingualText ar="إعادة المحاولة" en="Try Again" />
               </button>
             )}
-            {missingRequestedOccasion && <Link className="primary-button empty-home-button" to="/">العودة إلى الصفحة الرئيسية</Link>}
+            {missingRequestedOccasion && <Link className="primary-button empty-home-button" to="/"><BilingualText ar="العودة إلى الصفحة الرئيسية" en="Back to Home" /></Link>}
           </section>
         )}
       </main>
