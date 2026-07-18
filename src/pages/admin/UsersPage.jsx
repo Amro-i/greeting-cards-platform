@@ -35,7 +35,7 @@ const EMPTY_FORM = {
 
 function formatDate(value) {
   if (!value) return 'لم يسجل الدخول';
-  return new Intl.DateTimeFormat('ar-SA', {
+  return new Intl.DateTimeFormat('ar-SA-u-nu-latn', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value));

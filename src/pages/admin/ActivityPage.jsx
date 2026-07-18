@@ -60,12 +60,12 @@ function endOfDateIso(value) {
 }
 
 function formatNumber(value) {
-  return new Intl.NumberFormat('ar-SA').format(Number(value || 0));
+  return new Intl.NumberFormat('ar-SA-u-nu-latn').format(Number(value || 0));
 }
 
 function formatDateTime(value) {
   if (!value) return '—';
-  return new Intl.DateTimeFormat('ar-SA', {
+  return new Intl.DateTimeFormat('ar-SA-u-nu-latn', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -225,7 +225,7 @@ export default function ActivityPage() {
       const key = date.toISOString().slice(0, 10);
       dayMap.set(key, {
         key,
-        label: new Intl.DateTimeFormat('ar-SA', { day: 'numeric', month: 'short' }).format(date),
+        label: new Intl.DateTimeFormat('ar-SA-u-nu-latn', { day: 'numeric', month: 'short' }).format(date),
         value: 0,
       });
     }
@@ -473,8 +473,8 @@ export default function ActivityPage() {
             <option value="square">مربع</option>
             <option value="rectangle">مستطيل</option>
           </select>
-          <label className="activity-date-field"><span>من</span><input type="date" value={filters.dateFrom} onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))} /></label>
-          <label className="activity-date-field"><span>إلى</span><input type="date" value={filters.dateTo} onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))} /></label>
+          <label className="activity-date-field"><span>من</span><input type="date" lang="en" dir="ltr" value={filters.dateFrom} onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))} /></label>
+          <label className="activity-date-field"><span>إلى</span><input type="date" lang="en" dir="ltr" value={filters.dateTo} onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))} /></label>
           <button className="primary-button" type="submit"><Search size={17} /> بحث</button>
           <button className="secondary-button" type="button" onClick={clearFilters}><FilterX size={17} /> مسح الفلاتر</button>
         </form>

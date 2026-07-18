@@ -184,6 +184,28 @@ export default function TemplateEditorPage() {
     updateLanguageSettings(language, { x, y });
   }
 
+  function handleTextKeyDown(event, language) {
+    if (!canManage || !template || !settings[language]) return;
+
+    const movement = {
+      ArrowLeft: { x: -1, y: 0 },
+      ArrowRight: { x: 1, y: 0 },
+      ArrowUp: { x: 0, y: -1 },
+      ArrowDown: { x: 0, y: 1 },
+    }[event.key];
+
+    if (!movement) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const step = event.shiftKey ? 10 : 1;
+    const current = settings[language];
+    updateLanguageSettings(language, {
+      x: clamp(current.x + (movement.x * step) / template.image_width, 0.02, 0.98),
+      y: clamp(current.y + (movement.y * step) / template.image_height, 0.02, 0.98),
+    });
+  }
+
   function resetLanguage(language) {
     const defaultFont = findDefaultFont(fonts, language);
     updateLanguageSettings(language, normalizeTextSettings(null, defaultFont, language));
@@ -302,10 +324,18 @@ export default function TemplateEditorPage() {
                     textAlign: text.align,
                     cursor: canManage ? (dragging === language ? 'grabbing' : 'grab') : 'default',
                   }}
-                  onClick={() => setSelectedLanguage(language)}
+                  role="button"
+                  tabIndex={canManage ? 0 : -1}
+                  aria-label={`${LANGUAGE_META[language].label} — استخدم الأسهم لتحريك النص`}
+                  onClick={(event) => {
+                    setSelectedLanguage(language);
+                    if (canManage) event.currentTarget.focus({ preventScroll: true });
+                  }}
+                  onKeyDown={(event) => handleTextKeyDown(event, language)}
                   onPointerDown={(event) => {
                     if (!canManage) return;
                     setSelectedLanguage(language);
+                    event.currentTarget.focus({ preventScroll: true });
                     setDragging(language);
                     event.currentTarget.setPointerCapture(event.pointerId);
                   }}
@@ -326,7 +356,7 @@ export default function TemplateEditorPage() {
 
           <div className="preview-help">
             <Grip size={18} />
-            <span>اختر العربية أو الإنجليزية، ثم اسحب النص على الصورة. تحفظ الإحداثيات كنسبة لضمان ثبات المكان في ملف JPG.</span>
+            <span>اختر العربية أو الإنجليزية، ثم اسحب النص أو حرّكه بأسهم لوحة المفاتيح. استخدم Shift مع السهم للتحريك بمقدار أكبر.</span>
           </div>
         </div>
 
@@ -385,11 +415,11 @@ export default function TemplateEditorPage() {
             <div className="editor-two-fields">
               <label className="editor-field">
                 ارتفاع السطر
-                <input type="number" min="0.8" max="2" step="0.05" value={activeSettings.lineHeight} onChange={(event) => updateLanguageSettings(selectedLanguage, { lineHeight: Number(event.target.value) })} disabled={!canManage} />
+                <input type="number" lang="en" dir="ltr" min="0.8" max="2" step="0.05" value={activeSettings.lineHeight} onChange={(event) => updateLanguageSettings(selectedLanguage, { lineHeight: Number(event.target.value) })} disabled={!canManage} />
               </label>
               <label className="editor-field">
                 تباعد الحروف
-                <input type="number" min="-10" max="30" step="0.5" value={activeSettings.letterSpacing} onChange={(event) => updateLanguageSettings(selectedLanguage, { letterSpacing: Number(event.target.value) })} disabled={!canManage} />
+                <input type="number" lang="en" dir="ltr" min="-10" max="30" step="0.5" value={activeSettings.letterSpacing} onChange={(event) => updateLanguageSettings(selectedLanguage, { letterSpacing: Number(event.target.value) })} disabled={!canManage} />
               </label>
             </div>
           </div>
@@ -413,11 +443,11 @@ export default function TemplateEditorPage() {
             <div className="editor-two-fields">
               <label className="editor-field">
                 الموضع الأفقي X
-                <div className="percent-input"><input type="number" min="0" max="100" value={Math.round(activeSettings.x * 100)} onChange={(event) => updateLanguageSettings(selectedLanguage, { x: clamp(Number(event.target.value) / 100, 0, 1) })} disabled={!canManage} /><span>%</span></div>
+                <div className="percent-input"><input type="number" lang="en" dir="ltr" min="0" max="100" value={Math.round(activeSettings.x * 100)} onChange={(event) => updateLanguageSettings(selectedLanguage, { x: clamp(Number(event.target.value) / 100, 0, 1) })} disabled={!canManage} /><span>%</span></div>
               </label>
               <label className="editor-field">
                 الموضع الرأسي Y
-                <div className="percent-input"><input type="number" min="0" max="100" value={Math.round(activeSettings.y * 100)} onChange={(event) => updateLanguageSettings(selectedLanguage, { y: clamp(Number(event.target.value) / 100, 0, 1) })} disabled={!canManage} /><span>%</span></div>
+                <div className="percent-input"><input type="number" lang="en" dir="ltr" min="0" max="100" value={Math.round(activeSettings.y * 100)} onChange={(event) => updateLanguageSettings(selectedLanguage, { y: clamp(Number(event.target.value) / 100, 0, 1) })} disabled={!canManage} /><span>%</span></div>
               </label>
             </div>
 

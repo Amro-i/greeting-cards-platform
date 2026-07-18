@@ -584,8 +584,8 @@ export default function OccasionsPage() {
                 <div className="form-grid two-columns">
                   <label>اسم المناسبة بالعربي<input value={form.title_ar} onChange={(event) => updateField('title_ar', event.target.value)} placeholder="مثال: اليوم الوطني" required /></label>
                   <label>اسم المناسبة بالإنجليزي<input lang="en" dir="ltr" value={form.title_en} onChange={(event) => updateField('title_en', event.target.value)} placeholder="Example: National Day" required /></label>
-                  <label>تاريخ ووقت البداية<input type="datetime-local" value={form.starts_at} onChange={(event) => updateField('starts_at', event.target.value)} required /></label>
-                  <label>تاريخ ووقت النهاية<input type="datetime-local" value={form.ends_at} onChange={(event) => updateField('ends_at', event.target.value)} required /></label>
+                  <label>تاريخ ووقت البداية<input type="datetime-local" lang="en" dir="ltr" value={form.starts_at} onChange={(event) => updateField('starts_at', event.target.value)} required /></label>
+                  <label>تاريخ ووقت النهاية<input type="datetime-local" lang="en" dir="ltr" value={form.ends_at} onChange={(event) => updateField('ends_at', event.target.value)} required /></label>
                   <label className="full-column">
                     حالة المناسبة
                     <select value={form.status} onChange={(event) => updateField('status', event.target.value)}>

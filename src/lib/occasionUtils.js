@@ -28,7 +28,7 @@ export function getOccasionState(occasion, referenceDate = new Date()) {
 
 export function formatDateTime(value) {
   if (!value) return '—';
-  return new Intl.DateTimeFormat('ar-SA', {
+  return new Intl.DateTimeFormat('ar-SA-u-nu-latn', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value));

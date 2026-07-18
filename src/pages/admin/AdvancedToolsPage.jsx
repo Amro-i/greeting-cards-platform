@@ -395,8 +395,8 @@ export default function AdvancedToolsPage() {
             <option value="">كل العناصر</option>
             {Object.entries(ENTITY_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
-          <label className="activity-date-field"><span>من</span><input type="date" value={filters.dateFrom} onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))} /></label>
-          <label className="activity-date-field"><span>إلى</span><input type="date" value={filters.dateTo} onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))} /></label>
+          <label className="activity-date-field"><span>من</span><input type="date" lang="en" dir="ltr" value={filters.dateFrom} onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))} /></label>
+          <label className="activity-date-field"><span>إلى</span><input type="date" lang="en" dir="ltr" value={filters.dateTo} onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))} /></label>
           <button className="primary-button" type="submit"><Search size={17} /> بحث</button>
           <button className="secondary-button" type="button" onClick={clearFilters}><FilterX size={17} /> مسح</button>
         </form>
