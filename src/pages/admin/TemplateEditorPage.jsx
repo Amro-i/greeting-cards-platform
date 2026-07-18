@@ -49,6 +49,7 @@ export default function TemplateEditorPage() {
   const { profile } = useAuth();
   const canManage = ['super_admin', 'admin'].includes(profile?.role);
   const stageRef = useRef(null);
+  const previewViewportRef = useRef(null);
   const [template, setTemplate] = useState(null);
   const [fonts, setFonts] = useState([]);
   const [settingsRowId, setSettingsRowId] = useState('');
@@ -58,7 +59,7 @@ export default function TemplateEditorPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [stageWidth, setStageWidth] = useState(1);
+  const [stageSize, setStageSize] = useState({ width: 1, height: 1 });
   const [dragging, setDragging] = useState('');
 
   const loadEditor = useCallback(async () => {
@@ -118,13 +119,35 @@ export default function TemplateEditorPage() {
   }, [notice]);
 
   useEffect(() => {
-    if (!stageRef.current) return undefined;
-    const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect?.width || 1;
-      setStageWidth(width);
-    });
-    observer.observe(stageRef.current);
-    return () => observer.disconnect();
+    if (!template || !previewViewportRef.current) return undefined;
+
+    const updateStageSize = () => {
+      const availableWidth = previewViewportRef.current?.clientWidth || 1;
+      const compactScreen = window.innerWidth <= 700;
+      const preferredHeight = compactScreen
+        ? Math.min(500, Math.max(320, window.innerHeight * 0.55))
+        : Math.min(640, Math.max(420, window.innerHeight - 300));
+      const scale = Math.min(
+        availableWidth / template.image_width,
+        preferredHeight / template.image_height,
+      );
+
+      setStageSize({
+        width: Math.max(1, Math.floor(template.image_width * scale)),
+        height: Math.max(1, Math.floor(template.image_height * scale)),
+      });
+    };
+
+    const observer = new ResizeObserver(updateStageSize);
+    observer.observe(previewViewportRef.current);
+    window.addEventListener('resize', updateStageSize);
+    const frame = window.requestAnimationFrame(updateStageSize);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateStageSize);
+      window.cancelAnimationFrame(frame);
+    };
   }, [template]);
 
   const activeSettings = settings[selectedLanguage];
@@ -133,7 +156,7 @@ export default function TemplateEditorPage() {
     (font.is_active || font.id === activeSettings?.fontId) && fontSupportsLanguage(font, selectedLanguage)
   )), [activeSettings?.fontId, fonts, selectedLanguage]);
 
-  const previewScale = template?.image_width ? stageWidth / template.image_width : 1;
+  const previewScale = template?.image_width ? stageSize.width / template.image_width : 1;
 
   function updateLanguageSettings(language, patch) {
     setSettings((current) => ({
@@ -244,14 +267,19 @@ export default function TemplateEditorPage() {
             <span lang="en" dir="ltr">{template.image_width} × {template.image_height} px</span>
           </div>
 
-          <div
-            ref={stageRef}
-            className="design-stage"
-            style={{ aspectRatio: `${template.image_width} / ${template.image_height}` }}
-          >
-            <img src={getTemplatePublicUrl(template.image_path)} alt={template.name} draggable="false" />
+          <div ref={previewViewportRef} className="design-stage-viewport">
+            <div
+              ref={stageRef}
+              className="design-stage"
+              style={{
+                width: `${stageSize.width}px`,
+                height: `${stageSize.height}px`,
+                aspectRatio: `${template.image_width} / ${template.image_height}`,
+              }}
+            >
+              <img src={getTemplatePublicUrl(template.image_path)} alt={template.name} draggable="false" />
 
-            {['ar', 'en'].map((language) => {
+              {['ar', 'en'].map((language) => {
               const text = settings[language];
               const isSelected = selectedLanguage === language;
               return (
@@ -291,8 +319,9 @@ export default function TemplateEditorPage() {
                   <span>{text.sampleText}</span>
                   {isSelected && canManage && <i className="drag-handle"><Grip size={14} /></i>}
                 </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           <div className="preview-help">
