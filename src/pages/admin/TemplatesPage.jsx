@@ -198,7 +198,7 @@ export default function TemplatesPage() {
             const occasionState = getOccasionState(template.occasion);
             return (
               <article className="template-gallery-card" key={template.id}>
-                <div className={`template-preview shape-${template.shape}`}>
+                <div className={`template-preview template-preview--${template.shape}`}>
                   <img src={getTemplatePublicUrl(template.image_path)} alt={template.name} />
                   {!template.is_active && <span className="disabled-overlay">غير متاح</span>}
                 </div>
@@ -208,7 +208,7 @@ export default function TemplatesPage() {
                       <h2>{template.occasion?.title_ar || 'مناسبة محذوفة'}</h2>
                       <span lang="en" dir="ltr">{template.occasion?.title_en}</span>
                     </div>
-                    <span className={`shape-badge shape-${template.shape}`}>
+                    <span className={`shape-badge template-shape-badge template-shape-badge--${template.shape}`}>
                       {template.shape === 'square' ? 'مربع' : 'مستطيل'}
                     </span>
                   </div>
