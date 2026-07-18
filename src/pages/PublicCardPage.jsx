@@ -11,6 +11,7 @@ import {
   RectangleVertical,
   RefreshCw,
   RotateCcw,
+  Share2,
   Sparkles,
   Square,
 } from 'lucide-react';
@@ -87,8 +88,10 @@ export default function PublicCardPage({ adminPreview = false }) {
   const [formHeight, setFormHeight] = useState(0);
   const [previewAreaSize, setPreviewAreaSize] = useState({ width: 0, height: 0 });
   const [generatedUrl, setGeneratedUrl] = useState('');
+  const [generatedBlob, setGeneratedBlob] = useState(null);
   const [generatedFileName, setGeneratedFileName] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [missingRequestedOccasion, setMissingRequestedOccasion] = useState(false);
@@ -278,7 +281,9 @@ export default function PublicCardPage({ adminPreview = false }) {
       if (current) URL.revokeObjectURL(current);
       return '';
     });
+    setGeneratedBlob(null);
     setGeneratedFileName('');
+    setSharing(false);
     setNotice('');
   }
 
@@ -326,6 +331,7 @@ export default function PublicCardPage({ adminPreview = false }) {
       const objectUrl = URL.createObjectURL(blob);
       const fileName = makeCardFileName(occasion, enName, selectedShape);
       setGeneratedUrl(objectUrl);
+      setGeneratedBlob(blob);
       setGeneratedFileName(fileName);
 
       if (adminPreview) {
@@ -373,6 +379,49 @@ export default function PublicCardPage({ adminPreview = false }) {
     // بعض متصفحات iOS لا تدعم download بشكل كامل؛ فتح الملف يبقيه متاحًا للحفظ.
     if (!('download' in HTMLAnchorElement.prototype)) {
       window.open(generatedUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  async function shareCard() {
+    if (!generatedUrl || sharing) return;
+
+    setSharing(true);
+    setError('');
+    setNotice('');
+
+    try {
+      const blob = generatedBlob || await fetch(generatedUrl).then((response) => response.blob());
+      const fileName = generatedFileName || 'greeting-card.jpg';
+      const file = new File([blob], fileName, {
+        type: blob.type || 'image/jpeg',
+        lastModified: Date.now(),
+      });
+      const sharePayload = {
+        files: [file],
+        title: occasion?.title_ar || settings.platform_name_ar || 'بطاقة تهنئة',
+        text: 'بطاقة التهنئة الخاصة بي',
+      };
+      const fileSharingSupported = typeof navigator.canShare !== 'function'
+        || navigator.canShare({ files: [file] });
+
+      if (typeof navigator.share === 'function' && fileSharingSupported) {
+        await navigator.share(sharePayload);
+        setNotice('تمت مشاركة البطاقة بنجاح.');
+        return;
+      }
+
+      downloadCard();
+      setNotice('هذا المتصفح لا يدعم مشاركة ملف الصورة مباشرة، لذلك تم تنزيل البطاقة لمشاركتها من الجهاز.');
+    } catch (shareError) {
+      const cancelled = shareError?.name === 'AbortError'
+        || /cancel|canceled|cancelled|إلغاء/i.test(String(shareError?.message || ''));
+
+      if (!cancelled) {
+        downloadCard();
+        setNotice('تعذر فتح المشاركة المباشرة، لذلك تم تنزيل البطاقة لمشاركتها من الجهاز.');
+      }
+    } finally {
+      setSharing(false);
     }
   }
 
@@ -493,10 +542,15 @@ export default function PublicCardPage({ adminPreview = false }) {
 
           {generatedUrl && (
             <div className="generated-actions">
-              <button className="download-card-button" type="button" onClick={downloadCard}>
+              <button className="share-card-button" type="button" onClick={shareCard} disabled={sharing}>
+                {sharing
+                  ? <><LoaderCircle className="spin" size={19} /><BilingualText ar="جاري فتح المشاركة..." en="Opening Share..." /></>
+                  : <><Share2 size={19} /><BilingualText ar="مشاركة البطاقة" en="Share Card" /></>}
+              </button>
+              <button className="download-card-button" type="button" onClick={downloadCard} disabled={sharing}>
                 <Download size={19} /><BilingualText ar={settings.download_button_ar} en="Download JPG" />
               </button>
-              <button className="reset-card-button" type="button" onClick={resetForm}>
+              <button className="reset-card-button" type="button" onClick={resetForm} disabled={sharing}>
                 <RotateCcw size={17} /><BilingualText ar="البدء من جديد" en="Start Over" />
               </button>
             </div>

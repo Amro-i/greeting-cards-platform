@@ -128,6 +128,7 @@
 }
 
 .public-generate-button .bilingual-text,
+.share-card-button .bilingual-text,
 .download-card-button .bilingual-text,
 .reset-card-button .bilingual-text {
   justify-items: center;
@@ -135,6 +136,7 @@
 }
 
 .public-generate-button .bilingual-en,
+.share-card-button .bilingual-en,
 .download-card-button .bilingual-en,
 .reset-card-button .bilingual-en {
   color: inherit;

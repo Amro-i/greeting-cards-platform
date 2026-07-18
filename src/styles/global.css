@@ -812,8 +812,8 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .public-form-message.error { color: #9b3043; border-color: #f0c6cd; background: #fff2f4; }
 .public-form-message.success { color: #2d7452; border-color: #bfe3d1; background: #eefaf4; }
 .public-generate-button { min-height: 51px; margin-top: 2px; font-size: 16px; }
-.generated-actions { display: grid; gap: 9px; }
-.download-card-button, .reset-card-button {
+.generated-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.share-card-button, .download-card-button, .reset-card-button {
   min-height: 48px;
   display: inline-flex;
   align-items: center;
@@ -823,8 +823,10 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   cursor: pointer;
   font-weight: 600;
 }
+.share-card-button { border: 0; color: white; background: var(--primary); box-shadow: 0 8px 20px rgba(102,89,176,.2); }
 .download-card-button { border: 0; color: white; background: #2f7a58; box-shadow: 0 8px 20px rgba(47,122,88,.17); }
-.reset-card-button { border: 1px solid var(--border); color: #58516f; background: white; }
+.reset-card-button { grid-column: 1 / -1; border: 1px solid var(--border); color: #58516f; background: white; }
+.share-card-button:disabled, .download-card-button:disabled, .reset-card-button:disabled { opacity: .65; cursor: wait; }
 .public-preview-panel { min-width: 0; padding: 18px; }
 .public-preview-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
 .public-preview-heading > div { display: flex; align-items: center; gap: 9px; color: var(--primary-dark); }
@@ -1433,7 +1435,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   outline: 3px solid color-mix(in srgb, var(--primary) 28%, transparent);
   outline-offset: 2px;
 }
-.primary-button, .secondary-button, .danger-button, .download-card-button, .reset-card-button, .icon-button {
+.primary-button, .secondary-button, .danger-button, .share-card-button, .download-card-button, .reset-card-button, .icon-button {
   min-height: 44px;
 }
 
@@ -1465,6 +1467,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .public-field input { font-size: 16px; }
   .public-design-stage, .generated-card-preview > img { border-radius: 11px; }
   .generated-actions { grid-template-columns: 1fr; }
+  .reset-card-button { grid-column: auto; }
   .network-status-banner { font-size: 13px; }
   .modal-backdrop { padding: 12px; }
   .confirm-modal { width: 100%; }
