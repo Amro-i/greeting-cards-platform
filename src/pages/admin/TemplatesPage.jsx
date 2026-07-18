@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Eye, EyeOff, ImageOff, LoaderCircle, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, ImageOff, LoaderCircle, Palette, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -29,7 +30,8 @@ export default function TemplatesPage() {
       .from('templates')
       .select(`
         id, name, shape, image_path, image_width, image_height, is_active, created_at, updated_at,
-        occasion:occasions (id, title_ar, title_en, status, starts_at, ends_at)
+        occasion:occasions (id, title_ar, title_en, status, starts_at, ends_at),
+        template_settings (id)
       `)
       .order('updated_at', { ascending: false });
 
@@ -151,18 +153,24 @@ export default function TemplatesPage() {
                   <dl className="template-details">
                     <div><dt>الأبعاد</dt><dd lang="en" dir="ltr">{template.image_width} × {template.image_height} px</dd></div>
                     <div><dt>المناسبة</dt><dd><span className={`status-badge compact status-${occasionState.key}`}>{occasionState.label}</span></dd></div>
+                    <div><dt>إعداد النص</dt><dd>{Array.isArray(template.template_settings) ? (template.template_settings.length ? 'جاهز' : 'غير محدد') : (template.template_settings ? 'جاهز' : 'غير محدد')}</dd></div>
                     <div><dt>آخر تحديث</dt><dd>{formatDateTime(template.updated_at)}</dd></div>
                   </dl>
-                  {canManage && (
-                    <div className="template-card-actions">
-                      <button className="secondary-button" type="button" onClick={() => toggleTemplate(template)} disabled={busyId === template.id}>
-                        {template.is_active ? <><EyeOff size={17} /> إخفاء</> : <><Eye size={17} /> تفعيل</>}
-                      </button>
-                      <button className="icon-button danger-icon" type="button" aria-label="حذف القالب" onClick={() => setDeleteTarget(template)} disabled={Boolean(busyId)}>
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  )}
+                  <div className="template-card-actions">
+                    <Link className="primary-button compact-button" to={`/admin/templates/${template.id}/editor`}>
+                      <Palette size={17} /> {canManage ? 'تعديل التصميم' : 'معاينة التصميم'}
+                    </Link>
+                    {canManage && (
+                      <>
+                        <button className="secondary-button" type="button" onClick={() => toggleTemplate(template)} disabled={busyId === template.id}>
+                          {template.is_active ? <><EyeOff size={17} /> إخفاء</> : <><Eye size={17} /> تفعيل</>}
+                        </button>
+                        <button className="icon-button danger-icon" type="button" aria-label="حذف القالب" onClick={() => setDeleteTarget(template)} disabled={Boolean(busyId)}>
+                          <Trash2 size={18} />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </article>
             );
