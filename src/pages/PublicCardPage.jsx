@@ -313,7 +313,7 @@ export default function PublicCardPage({ adminPreview = false }) {
     const hasInvalidCharacters = rawValue !== cleanValue;
 
     setArabicName(cleanValue);
-    setArabicNameError(hasInvalidCharacters ? 'اكتب الاسم باللغة العربية فقط.' : '');
+    setArabicNameError(hasInvalidCharacters ? 'invalid' : '');
     clearGeneratedCard();
   }
 
@@ -323,7 +323,7 @@ export default function PublicCardPage({ adminPreview = false }) {
     const hasInvalidCharacters = rawValue !== cleanValue;
 
     setEnglishName(cleanValue);
-    setEnglishNameError(hasInvalidCharacters ? 'اكتب الاسم باللغة الإنجليزية فقط.' : '');
+    setEnglishNameError(hasInvalidCharacters ? 'invalid' : '');
     clearGeneratedCard();
   }
 
@@ -520,7 +520,10 @@ export default function PublicCardPage({ adminPreview = false }) {
             />
             <div className="field-meta-row">
               {arabicNameError ? (
-                <small id="arabic-name-language-error" className="field-language-error" role="alert">{arabicNameError}</small>
+                <small id="arabic-name-language-error" className="field-language-error" role="alert">
+                  <span>اكتب الاسم باللغة العربية فقط.</span>
+                  <span className="field-language-error-en">Enter the name in Arabic only.</span>
+                </small>
               ) : <span />}
               <small className="field-character-count">{arabicName.length}/100</small>
             </div>
@@ -543,7 +546,10 @@ export default function PublicCardPage({ adminPreview = false }) {
             />
             <div className="field-meta-row">
               {englishNameError ? (
-                <small id="english-name-language-error" className="field-language-error" role="alert">{englishNameError}</small>
+                <small id="english-name-language-error" className="field-language-error" role="alert">
+                  <span>اكتب الاسم باللغة الإنجليزية فقط.</span>
+                  <span className="field-language-error-en">Enter the name in English only.</span>
+                </small>
               ) : <span />}
               <small className="field-character-count">{englishName.length}/100</small>
             </div>

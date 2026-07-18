@@ -307,11 +307,25 @@
 }
 
 .public-page .field-language-error {
+  display: grid;
+  gap: 1px;
   color: #b52f46;
   font-size: 12px;
   font-weight: 400;
   line-height: 1.35;
   text-align: right;
+}
+
+.public-page .field-language-error > span {
+  display: block;
+}
+
+.public-page .field-language-error-en {
+  font-family: 'Aller', sans-serif;
+  font-size: 11px;
+  direction: rtl;
+  text-align: right;
+  opacity: .86;
 }
 
 .public-page .field-meta-row .field-character-count {
