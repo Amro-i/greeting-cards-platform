@@ -11,8 +11,6 @@ services:
         sync: false
       - key: NODE_VERSION
         value: 20.19.0
-      - key: SKIP_INSTALL_DEPS
-        value: "true"
     routes:
       - type: rewrite
         source: /*
