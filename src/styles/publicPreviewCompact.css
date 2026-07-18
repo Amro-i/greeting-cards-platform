@@ -355,3 +355,8 @@
   place-items: center;
   padding: 0;
 }
+
+/* Arabic name field: one pixel larger than the English typed text */
+.public-page .public-field input:not([lang='en']) {
+  font-size: 17px !important;
+}
