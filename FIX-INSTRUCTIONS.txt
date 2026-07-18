@@ -1,0 +1,3 @@
+ارفع جميع محتويات هذا المجلد إلى جذر مستودع GitHub greeting-cards-platform ووافق على استبدال الملفات الموجودة.
+يجب أن يظهر package.json وrender.yaml مباشرة في الصفحة الرئيسية للمستودع.
+بعد Commit Changes، ارجع إلى Render واختر Manual Deploy > Clear build cache & deploy.
