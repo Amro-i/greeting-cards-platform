@@ -499,7 +499,7 @@ export default function PublicCardPage({ adminPreview = false }) {
           <div className="builder-section-heading">
             <span>1</span>
             <div>
-              <BilingualText as="strong" ar="أدخل الأسماء" en="Enter Names" />
+              <BilingualText as="strong" ar="أدخل الاسم" en="Enter Name" />
             </div>
           </div>
 
