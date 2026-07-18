@@ -10,6 +10,7 @@ const ActivityPage = lazy(() => import('./pages/admin/ActivityPage'));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 const FontsPage = lazy(() => import('./pages/admin/FontsPage'));
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
+const LaunchReadinessPage = lazy(() => import('./pages/admin/LaunchReadinessPage'));
 const OccasionsPage = lazy(() => import('./pages/admin/OccasionsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const TemplateEditorPage = lazy(() => import('./pages/admin/TemplateEditorPage'));
@@ -53,6 +54,9 @@ export default function App() {
       <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
         <Route path="/admin/users" element={<AdminLayout />}>
           <Route index element={lazyPage(UsersPage)} />
+        </Route>
+        <Route path="/admin/launch-readiness" element={<AdminLayout />}>
+          <Route index element={lazyPage(LaunchReadinessPage)} />
         </Route>
       </Route>
 

@@ -5,6 +5,7 @@ import {
   Files,
   LayoutDashboard,
   LogOut,
+  Rocket,
   Settings,
   TextCursorInput,
   UserCircle,
@@ -22,6 +23,7 @@ const links = [
   { to: '/admin/activity', label: 'السجل والإحصائيات', icon: BarChart3 },
   { to: '/admin/advanced-tools', label: 'أدوات الإدارة', icon: Wrench },
   { to: '/admin/users', label: 'المستخدمون', icon: Users, superAdminOnly: true },
+  { to: '/admin/launch-readiness', label: 'جاهزية الإطلاق', icon: Rocket, superAdminOnly: true },
   { to: '/admin/settings', label: 'الإعدادات', icon: Settings },
   { to: '/admin/account', label: 'حسابي', icon: UserCircle },
 ];
@@ -57,6 +59,8 @@ export default function AdminLayout() {
             </NavLink>
           ))}
         </nav>
+
+        <div className="sidebar-release">الإصدار الرسمي v1.0.0</div>
 
         <button className="signout-button" type="button" onClick={signOut}>
           <LogOut size={18} />

@@ -21,6 +21,22 @@ export function createRequestKey() {
   });
 }
 
+
+const ANONYMOUS_CLIENT_KEY_STORAGE = 'greeting-cards-client-key-v1';
+
+export function getAnonymousClientKey() {
+  try {
+    const existing = window.localStorage.getItem(ANONYMOUS_CLIENT_KEY_STORAGE);
+    if (existing && existing.length >= 20) return existing;
+
+    const created = createRequestKey();
+    window.localStorage.setItem(ANONYMOUS_CLIENT_KEY_STORAGE, created);
+    return created;
+  } catch {
+    return createRequestKey();
+  }
+}
+
 export function delay(milliseconds) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }

@@ -40,6 +40,8 @@ const ENTITY_LABELS = {
   app_settings: 'إعدادات المنصة',
   storage: 'ملفات التخزين',
   admin_backup: 'نسخة إدارية',
+  release_snapshot: 'نسخة إطلاق',
+  platform_security: 'حماية المنصة',
 };
 
 const BUCKETS = [

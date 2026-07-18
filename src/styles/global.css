@@ -1761,3 +1761,182 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     width: 100%;
   }
 }
+
+/* Package 11: final launch readiness */
+.sidebar-release {
+  margin-top: auto;
+  padding: 15px 8px 9px;
+  text-align: center;
+  color: rgba(255, 255, 255, .48);
+  font: 11px 'Aller', sans-serif;
+  letter-spacing: .02em;
+}
+.sidebar-release + .signout-button { margin-top: 0; }
+
+.launch-readiness-page { max-width: 1320px; margin: 0 auto; }
+.launch-status-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 25px;
+  overflow: hidden;
+  border: 1px solid #d8d4e9;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fff, #f5f3ff);
+  box-shadow: 0 12px 34px rgba(49, 44, 84, .07);
+}
+.launch-status-hero.ready { border-color: #bfe3d1; background: linear-gradient(135deg, #fff, #eefaf4); }
+.launch-status-hero.review { border-color: #ddd5aa; background: linear-gradient(135deg, #fff, #fffbea); }
+.launch-status-hero.blocked { border-color: #efc8cf; background: linear-gradient(135deg, #fff, #fff2f4); }
+.launch-status-icon {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: var(--primary);
+  background: white;
+  box-shadow: 0 8px 24px rgba(49, 44, 84, .10);
+}
+.launch-status-hero.ready .launch-status-icon { color: #187849; }
+.launch-status-hero.review .launch-status-icon { color: #9a7620; }
+.launch-status-hero.blocked .launch-status-icon { color: #b43c50; }
+.launch-status-hero span:first-child { color: var(--muted); font: 12px 'Aller', sans-serif; }
+.launch-status-hero h2 { margin: 3px 0 4px; font-size: 25px; }
+.launch-status-hero p { margin: 0; color: var(--muted); }
+.release-badge {
+  min-width: 68px;
+  padding: 8px 12px;
+  text-align: center;
+  border: 1px solid rgba(102, 89, 176, .18);
+  border-radius: 999px;
+  color: var(--primary-dark);
+  background: rgba(255, 255, 255, .8);
+  font: 13px 'Aller', sans-serif;
+}
+.launch-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+  margin-top: 16px;
+}
+.launch-summary-grid article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 11px;
+  padding: 15px 17px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: #fff;
+}
+.launch-summary-grid svg { grid-row: 1 / 3; color: var(--primary); }
+.launch-summary-grid strong { font: 22px 'Aller', sans-serif; }
+.launch-summary-grid span { color: var(--muted); font-size: 12px; }
+.launch-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.launch-card { min-width: 0; }
+.launch-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--border);
+}
+.launch-card-heading > div { display: flex; align-items: center; gap: 10px; }
+.launch-card-heading svg { color: var(--primary); }
+.launch-card-heading h2 { margin: 0; font-size: 20px; }
+.launch-card-heading p { margin: 2px 0 0; font-size: 13px; }
+.launch-card-heading > span {
+  min-width: 50px;
+  padding: 6px 9px;
+  text-align: center;
+  border-radius: 999px;
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+  font: 13px 'Aller', sans-serif;
+}
+.launch-check-list,
+.manual-launch-list { display: grid; gap: 9px; margin-top: 16px; }
+.launch-check-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  align-items: flex-start;
+  padding: 12px 13px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: #fbfbfd;
+}
+.launch-check-row.passed { border-color: #cce6d8; background: #f4fbf7; }
+.launch-check-row.failed { border-color: #efcbd1; background: #fff5f6; }
+.launch-check-row.warning { border-color: #eadfae; background: #fffcf1; }
+.launch-check-row.passed > svg { color: #187849; }
+.launch-check-row.failed > svg { color: #b43c50; }
+.launch-check-row.warning > svg { color: #9a7620; }
+.launch-check-row strong { display: block; font-size: 14px; }
+.launch-check-row span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.manual-launch-list label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  min-height: 49px;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: #fbfbfd;
+  cursor: pointer;
+}
+.manual-launch-list label.checked { border-color: #cce6d8; background: #f4fbf7; }
+.manual-launch-list input { width: 18px; height: 18px; accent-color: var(--primary); }
+.manual-launch-list span { line-height: 1.55; }
+.launch-backup-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.launch-backup-card > div:first-child { display: flex; align-items: center; gap: 14px; }
+.launch-backup-card > div:first-child > svg { flex: 0 0 auto; color: var(--primary); }
+.launch-backup-card h2 { margin: 0; }
+.launch-backup-card p { margin: 5px 0 0; max-width: 750px; }
+.launch-actions { display: flex; flex: 0 0 auto; gap: 9px; }
+.launch-security-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 17px;
+  padding: 16px 18px;
+  border: 1px solid #dcd6f7;
+  border-radius: 15px;
+  color: #51468c;
+  background: #f6f3ff;
+}
+.launch-security-note svg { flex: 0 0 auto; }
+.launch-security-note strong,
+.launch-security-note span { display: block; }
+.launch-security-note span { margin-top: 3px; color: #71699a; font-size: 13px; line-height: 1.6; }
+
+@media (max-width: 1050px) {
+  .launch-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .launch-columns { grid-template-columns: 1fr; }
+  .launch-backup-card { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 760px) {
+  .sidebar-release { margin-top: 16px; }
+  .launch-status-hero { grid-template-columns: auto minmax(0, 1fr); padding: 19px; }
+  .launch-status-icon { width: 53px; height: 53px; }
+  .launch-status-hero h2 { font-size: 21px; }
+  .release-badge { grid-column: 1 / -1; justify-self: start; }
+  .launch-summary-grid { grid-template-columns: 1fr; }
+  .launch-actions { width: 100%; flex-direction: column-reverse; }
+  .launch-actions button { width: 100%; }
+}

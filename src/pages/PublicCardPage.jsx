@@ -21,7 +21,7 @@ import { getBrandAssetUrl, useAppSettings } from '../context/AppSettingsContext'
 import { makeCardFileName, renderGreetingCard } from '../lib/cardRenderer';
 import { findDefaultFont, loadFonts, normalizeTextSettings } from '../lib/fontUtils';
 import { getFriendlySupabaseError, getTemplatePublicUrl } from '../lib/occasionUtils';
-import { createRequestKey, getFriendlyClientError, normalizePersonName, retryOperation, withTimeout } from '../lib/reliability';
+import { createRequestKey, getAnonymousClientKey, getFriendlyClientError, normalizePersonName, retryOperation, withTimeout } from '../lib/reliability';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 
@@ -267,17 +267,22 @@ export default function PublicCardPage({ adminPreview = false }) {
         setNotice('تم تجهيز بطاقة المعاينة. لم تُسجل العملية في الإحصائيات.');
       } else {
         const requestKey = createRequestKey();
-        const { error: logError } = await withTimeout(() => supabase.from('generation_logs').insert({
-          occasion_id: occasion.id,
-          template_id: selectedTemplate.id,
-          arabic_name: arName,
-          english_name: enName,
-          shape: selectedShape,
-          request_key: requestKey,
+        const clientKey = getAnonymousClientKey();
+        const { error: logError } = await withTimeout(() => supabase.rpc('create_generation_log', {
+          p_occasion_id: occasion.id,
+          p_template_id: selectedTemplate.id,
+          p_arabic_name: arName,
+          p_english_name: enName,
+          p_shape: selectedShape,
+          p_request_key: requestKey,
+          p_client_key: clientKey,
         }), 12_000, 'تم تجهيز البطاقة، لكن تأخر تسجيل العملية في الإحصائيات.');
 
         if (logError) {
-          setNotice('تم تجهيز البطاقة، لكن تعذر تسجيل العملية في الإحصائيات.');
+          const isRateLimited = String(logError.message || '').includes('RATE_LIMIT_EXCEEDED');
+          setNotice(isRateLimited
+            ? 'تم تجهيز البطاقة. تم إيقاف تسجيل محاولات إضافية مؤقتًا بسبب كثرة الاستخدام، ويمكنك تنزيل البطاقة الآن.'
+            : 'تم تجهيز البطاقة، لكن تعذر تسجيل العملية في الإحصائيات.');
         } else {
           setNotice('تم تجهيز البطاقة بنجاح. يمكنك تنزيلها الآن.');
         }

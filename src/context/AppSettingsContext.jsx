@@ -82,9 +82,18 @@ export function AppSettingsProvider({ children }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--primary', settings.primary_color || DEFAULT_APP_SETTINGS.primary_color);
+    const primaryColor = settings.primary_color || DEFAULT_APP_SETTINGS.primary_color;
+    root.style.setProperty('--primary', primaryColor);
     root.style.setProperty('--primary-dark', settings.primary_dark_color || DEFAULT_APP_SETTINGS.primary_dark_color);
-  }, [settings.primary_color, settings.primary_dark_color]);
+
+    document.title = settings.platform_name_ar || DEFAULT_APP_SETTINGS.platform_name_ar;
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.setAttribute('content', primaryColor);
+    const description = document.querySelector('meta[name="description"]');
+    if (description) {
+      description.setAttribute('content', `${settings.platform_name_ar || DEFAULT_APP_SETTINGS.platform_name_ar} — إنشاء بطاقات تهنئة مخصصة`);
+    }
+  }, [settings.platform_name_ar, settings.primary_color, settings.primary_dark_color]);
 
   const value = useMemo(() => ({
     settings,
