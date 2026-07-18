@@ -1,0 +1,108 @@
+/* Final platform style: sharp boxes/cards and horizontal logo */
+
+/* Structural cards, boxes, fields, controls and dialogs use sharp corners. */
+:where(
+  button,
+  input,
+  textarea,
+  select,
+  table,
+  .sidebar,
+  .admin-topbar,
+  .content-card,
+  .login-panel,
+  .public-preview-panel,
+  .card-builder-form,
+  .public-design-stage,
+  .generated-card-image,
+  .settings-preview-card,
+  .brand-asset-field,
+  .brand-asset-preview,
+  .brand-logo,
+  .brand-mark,
+  .brand-logo-preview,
+  .public-header-logo,
+  .user-form-modal,
+  .role-pill,
+  .status-badge,
+  .shape-badge,
+  .account-status,
+  .user-avatar,
+  .icon-button,
+  .inline-notice,
+  .success-message,
+  .form-error,
+  .setup-alert,
+  .network-status-banner,
+  [class$='-card'],
+  [class*='-card '],
+  [class$='-panel'],
+  [class*='-panel '],
+  [class$='-box'],
+  [class*='-box '],
+  [class$='-modal'],
+  [class*='-modal '],
+  [class$='-drawer'],
+  [class*='-drawer '],
+  [class$='-field'],
+  [class*='-field '],
+  [class$='-button'],
+  [class*='-button ']
+) {
+  border-radius: 0 !important;
+}
+
+/* Keep native circular progress/selection artwork inside SVGs untouched. */
+
+/* Official horizontal platform logo: 3:1 display ratio. */
+.brand-logo {
+  width: 120px !important;
+  height: 40px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.brand-logo img,
+.brand-logo.large img,
+.brand-logo-preview img,
+.public-header-logo img {
+  padding: 0 !important;
+  object-fit: contain !important;
+}
+
+.brand-logo.large {
+  width: min(240px, 82vw) !important;
+  height: 80px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.brand-logo-preview {
+  width: 120px !important;
+  height: 40px !important;
+}
+
+.brand-asset-preview.logo {
+  min-height: 145px;
+}
+
+.public-header-logo {
+  width: 170px !important;
+  height: 52px !important;
+  flex-basis: 170px !important;
+}
+
+@media (max-width: 560px) {
+  .public-header-logo {
+    width: 120px !important;
+    height: 38px !important;
+    flex-basis: 120px !important;
+  }
+
+  .brand-logo {
+    width: 105px !important;
+    height: 35px !important;
+  }
+}

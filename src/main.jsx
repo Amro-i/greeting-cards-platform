@@ -8,6 +8,7 @@ import { AppSettingsProvider } from './context/AppSettingsContext';
 import { AuthProvider } from './context/AuthContext';
 import './styles/global.css';
 import './styles/platformTypography.css';
+import './styles/sharpCorners.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

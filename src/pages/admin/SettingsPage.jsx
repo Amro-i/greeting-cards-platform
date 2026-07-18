@@ -128,7 +128,7 @@ export default function SettingsPage() {
           <div className="brand-assets-grid">
             <BrandAssetField
               label="شعار المنصة"
-              hint="يمكن رفع أي مقاس مناسب؛ يُحتوى الشعار تلقائيًا دون قص."
+              hint="شعار أفقي بنسبة 3:1؛ تتم معالجته تلقائيًا دون قص."
               value={form.logo_path || ''}
               folder="logos"
               onChange={(value) => updateField('logo_path', value)}

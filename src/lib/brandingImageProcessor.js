@@ -1,14 +1,14 @@
 const TARGETS = {
   logo: {
-    width: 1024,
-    height: 1024,
-    minimumWidth: 512,
-    minimumHeight: 512,
+    width: 1200,
+    height: 400,
+    minimumWidth: 600,
+    minimumHeight: 200,
     mode: 'contain',
     quality: 0.92,
     mimeType: 'image/webp',
     extension: 'webp',
-    label: '1024 × 1024 px',
+    label: '1200 × 400 px',
   },
   cover: {
     width: 1920,

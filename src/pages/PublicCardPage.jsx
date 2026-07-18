@@ -623,7 +623,9 @@ export default function PublicCardPage({ adminPreview = false }) {
               <ImageIcon size={20} />
               <span>
                 <BilingualText as="strong" ar={generatedUrl ? 'البطاقة النهائية' : 'معاينة البطاقة'} en={generatedUrl ? 'Final Card' : 'Card Preview'} />
-                <small>{selectedTemplate ? `${selectedTemplate.image_width} × ${selectedTemplate.image_height} px` : 'اختر قالبًا متاحًا / Choose an available format'}</small>
+                {adminPreview && selectedTemplate && (
+                  <small>{`${selectedTemplate.image_width} × ${selectedTemplate.image_height} px`}</small>
+                )}
               </span>
             </div>
           </div>
